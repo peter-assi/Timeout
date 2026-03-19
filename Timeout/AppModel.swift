@@ -32,6 +32,9 @@ final class AppModel: ObservableObject {
     ) {
         self.settings = settings
         self.launchAtLoginController = launchAtLoginController
+        overlayController.onEscape = { [weak self] in
+            self?.endBreakEarly()
+        }
 
         bindSettings()
         installWorkspaceObservers()

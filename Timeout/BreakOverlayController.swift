@@ -3,22 +3,32 @@ import SwiftUI
 
 @MainActor
 final class BreakOverlayController {
+    final class OverlayWindow: NSPanel {
+        override var canBecomeKey: Bool { true }
+        override var canBecomeMain: Bool { true }
+    }
+
     fileprivate final class OverlayState: ObservableObject {
         @Published var subtitle = ""
     }
 
     private let state = OverlayState()
     private var windows: [NSWindow] = []
+    private var keyMonitor: Any?
+    var onEscape: (() -> Void)?
 
     func show(subtitle: String) {
         state.subtitle = subtitle
         ensureWindows()
+        installEscapeMonitor()
 
-        for window in windows {
+        NSApp.activate(ignoringOtherApps: true)
+
+        for window in windows where window !== preferredKeyWindow {
             window.orderFrontRegardless()
         }
 
-        NSApp.activate(ignoringOtherApps: true)
+        preferredKeyWindow?.makeKeyAndOrderFront(nil)
     }
 
     func updateSubtitle(_ subtitle: String) {
@@ -30,7 +40,12 @@ final class BreakOverlayController {
     }
 
     func hide() {
+        removeEscapeMonitor()
         windows.forEach { $0.orderOut(nil) }
+    }
+
+    private var preferredKeyWindow: NSWindow? {
+        windows.first(where: { $0.screen == NSScreen.main }) ?? windows.first
     }
 
     private func ensureWindows() {
@@ -48,14 +63,15 @@ final class BreakOverlayController {
     }
 
     private func rebuildWindows(for screens: [NSScreen]) {
+        removeEscapeMonitor()
         windows.forEach { $0.close() }
         windows = screens.map(makeWindow(for:))
     }
 
     private func makeWindow(for screen: NSScreen) -> NSWindow {
-        let window = NSPanel(
+        let window = OverlayWindow(
             contentRect: screen.frame,
-            styleMask: [.borderless, .nonactivatingPanel],
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
@@ -70,6 +86,30 @@ final class BreakOverlayController {
         window.contentView = NSHostingView(rootView: BreakOverlayView(state: state))
 
         return window
+    }
+
+    private func installEscapeMonitor() {
+        guard keyMonitor == nil else {
+            return
+        }
+
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard event.keyCode == 53 else {
+                return event
+            }
+
+            self?.onEscape?()
+            return nil
+        }
+    }
+
+    private func removeEscapeMonitor() {
+        guard let keyMonitor else {
+            return
+        }
+
+        NSEvent.removeMonitor(keyMonitor)
+        self.keyMonitor = nil
     }
 }
 
@@ -98,6 +138,10 @@ private struct BreakOverlayView: View {
                 Text(state.subtitle)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.72))
+
+                Text("Press Esc to skip this break.")
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.6))
             }
             .padding(48)
         }
