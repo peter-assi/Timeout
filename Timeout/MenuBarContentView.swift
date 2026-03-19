@@ -45,9 +45,33 @@ struct MenuBarContentView: View {
                         .font(.body.monospacedDigit())
                         .frame(width: 64, alignment: .trailing)
                 }
+
+                Toggle("Delay automatic breaks during calls", isOn: $settings.postponeDuringCallsEnabled)
+                    .padding(.top, 2)
+
+                Text("Retry delay")
+                    .font(.headline)
+                    .foregroundStyle(settings.postponeDuringCallsEnabled ? .primary : .secondary)
+
+                HStack(spacing: 12) {
+                    Slider(value: $settings.callRetryDelaySeconds, in: 15...600, step: 15)
+                        .disabled(!settings.postponeDuringCallsEnabled)
+
+                    Text(DurationFormatting.secondsLabel(settings.callRetryDelaySeconds))
+                        .font(.body.monospacedDigit())
+                        .foregroundStyle(settings.postponeDuringCallsEnabled ? .primary : .secondary)
+                        .frame(width: 64, alignment: .trailing)
+                }
             }
 
             Toggle("Launch at login", isOn: $settings.launchAtLoginEnabled)
+
+            if settings.postponeDuringCallsEnabled {
+                Text("Call detection is best-effort and currently checks visible window titles for Google Meet and Slack Huddles before an automatic break starts.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(launchAtLoginController.statusDescription)
@@ -83,7 +107,6 @@ struct MenuBarContentView: View {
             .keyboardShortcut("q")
         }
         .padding(16)
-        .frame(width: 340)
+        .frame(width: 360)
     }
 }
-

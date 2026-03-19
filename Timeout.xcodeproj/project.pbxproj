@@ -10,6 +10,7 @@
 		02DF37CB12253DC55C93DC65 /* BreakOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4DEA2D586FA5118C87EF86 /* BreakOverlayController.swift */; };
 		2D9178A0FF59F9F7E84F3BB5 /* LaunchAtLoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F48E8FCE635B77508201E8D /* LaunchAtLoginController.swift */; };
 		50C198464132E91D199F41FB /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C30D765A32834DEDD601EBC /* MenuBarContentView.swift */; };
+		72BFD8F84E43A831F87DF97E /* CallActivityDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6250200A287DB269B16C070C /* CallActivityDetector.swift */; };
 		947F07B4BCAA97CC1E3A71FC /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05753A16FE8BA130301BEEE /* Formatting.swift */; };
 		AD373CC6597885EAD80B2A0D /* TimeoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4635DE2AC1C3DB00F089BD9D /* TimeoutApp.swift */; };
 		B36DF891138EC7CA5229DB80 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F1B8F40BF9BEC2346CB0AEF /* SettingsStore.swift */; };
@@ -22,6 +23,7 @@
 		4635DE2AC1C3DB00F089BD9D /* TimeoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeoutApp.swift; sourceTree = "<group>"; };
 		5C30D765A32834DEDD601EBC /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		5F1B8F40BF9BEC2346CB0AEF /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		6250200A287DB269B16C070C /* CallActivityDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallActivityDetector.swift; sourceTree = "<group>"; };
 		69CCB3F209A6365890D1A937 /* Timeout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Timeout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		91890BE13A21F9B5D541C291 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CF6DE003BAB4B5A89B7DB234 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -42,6 +44,7 @@
 			children = (
 				CF6DE003BAB4B5A89B7DB234 /* AppModel.swift */,
 				2A4DEA2D586FA5118C87EF86 /* BreakOverlayController.swift */,
+				6250200A287DB269B16C070C /* CallActivityDetector.swift */,
 				F05753A16FE8BA130301BEEE /* Formatting.swift */,
 				91890BE13A21F9B5D541C291 /* Info.plist */,
 				0F48E8FCE635B77508201E8D /* LaunchAtLoginController.swift */,
@@ -117,6 +120,7 @@
 			files = (
 				F45D4E1E446B8D0A633EEA7A /* AppModel.swift in Sources */,
 				02DF37CB12253DC55C93DC65 /* BreakOverlayController.swift in Sources */,
+				72BFD8F84E43A831F87DF97E /* CallActivityDetector.swift in Sources */,
 				947F07B4BCAA97CC1E3A71FC /* Formatting.swift in Sources */,
 				2D9178A0FF59F9F7E84F3BB5 /* LaunchAtLoginController.swift in Sources */,
 				50C198464132E91D199F41FB /* MenuBarContentView.swift in Sources */,
