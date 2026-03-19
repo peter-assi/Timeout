@@ -119,27 +119,42 @@ private struct BreakOverlayView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(red: 0.12, green: 0.14, blue: 0.19), Color(red: 0.04, green: 0.05, blue: 0.07)],
+                colors: [Color(red: 0.09, green: 0.17, blue: 0.17), Color(red: 0.02, green: 0.06, blue: 0.06)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
 
+            Circle()
+                .fill(Color(red: 0.41, green: 0.94, blue: 0.88).opacity(0.12))
+                .frame(width: 620, height: 620)
+                .offset(x: 420, y: -250)
+
+            Circle()
+                .fill(Color(red: 0.41, green: 0.94, blue: 0.88).opacity(0.07))
+                .frame(width: 440, height: 440)
+                .offset(x: -520, y: 320)
+
             VStack(spacing: 22) {
                 Text("Timeout!")
-                    .font(.system(size: 108, weight: .black, design: .rounded))
+                    .font(font("AppleSDGothicNeo-Heavy", size: 190, fallbackWeight: .black))
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(red: 0.76, green: 0.98, blue: 0.96))
 
                 Text("Step away from the keyboard and move around a bit.")
-                    .font(.system(size: 26, weight: .medium, design: .rounded))
+                    .font(font("AppleSDGothicNeo-Medium", size: 35, fallbackWeight: .medium))
                     .foregroundStyle(Color.white.opacity(0.82))
 
                 Text(state.subtitle)
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(font("AppleSDGothicNeo-Bold", size: 28, fallbackWeight: .bold))
                     .foregroundStyle(Color.white.opacity(0.72))
             }
             .padding(48)
         }
+    }
+
+    private func font(_ name: String, size: CGFloat, fallbackWeight: NSFont.Weight) -> Font {
+        let resolvedFont = NSFont(name: name, size: size) ?? NSFont.systemFont(ofSize: size, weight: fallbackWeight)
+        return Font(resolvedFont)
     }
 }
