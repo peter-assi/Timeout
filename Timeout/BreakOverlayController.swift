@@ -138,10 +138,6 @@ private struct BreakOverlayView: View {
                 Text(state.subtitle)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.72))
-
-                Text("Press Esc to skip this break.")
-                    .font(.system(size: 18, weight: .medium, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.6))
             }
             .padding(48)
         }
