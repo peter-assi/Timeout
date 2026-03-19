@@ -6,7 +6,7 @@
 
 - Menubar app with no Dock icon
 - Configurable work interval and break duration
-- Optional postponement for automatic breaks when a Google Meet or Slack Huddle appears to be active
+- Optional postponement for automatic breaks using camera and microphone activity, with window-title detection as an optional fallback for Google Meet and Slack Huddles
 - Fullscreen topmost break overlay that says `Timeout!`
 - Timer resets when the screen sleeps or the session becomes inactive
 - Launch at login is enabled by default and can be turned off from the menu

@@ -49,6 +49,12 @@ struct MenuBarContentView: View {
                 Toggle("Delay automatic breaks during calls", isOn: $settings.postponeDuringCallsEnabled)
                     .padding(.top, 2)
 
+                Toggle("Use camera and microphone activity", isOn: $settings.useHardwareActivityDetection)
+                    .disabled(!settings.postponeDuringCallsEnabled)
+
+                Toggle("Use window title fallback", isOn: $settings.useWindowTitleFallback)
+                    .disabled(!settings.postponeDuringCallsEnabled)
+
                 Text("Retry delay")
                     .font(.headline)
                     .foregroundStyle(settings.postponeDuringCallsEnabled ? .primary : .secondary)
@@ -67,7 +73,7 @@ struct MenuBarContentView: View {
             Toggle("Launch at login", isOn: $settings.launchAtLoginEnabled)
 
             if settings.postponeDuringCallsEnabled {
-                Text("Call detection is best-effort and currently checks visible window titles for Google Meet and Slack Huddles before an automatic break starts.")
+                Text("Hardware activity is checked first using camera and microphone usage. Visible window titles for Google Meet and Slack Huddles can stay enabled as a fallback.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

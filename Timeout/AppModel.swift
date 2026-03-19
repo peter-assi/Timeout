@@ -222,7 +222,13 @@ final class AppModel: ObservableObject {
     }
 
     private func attemptAutomaticBreak(from referenceDate: Date) {
-        guard settings.postponeDuringCallsEnabled, let detectedCall = callActivityDetector.detectActiveCall() else {
+        let detectionConfiguration = CallActivityDetector.Configuration(
+            useHardwareActivityDetection: settings.useHardwareActivityDetection,
+            useWindowTitleFallback: settings.useWindowTitleFallback
+        )
+
+        guard settings.postponeDuringCallsEnabled,
+              let detectedCall = callActivityDetector.detectActiveCall(using: detectionConfiguration) else {
             startBreak(from: referenceDate)
             return
         }
