@@ -25,6 +25,7 @@ final class AppModel: ObservableObject {
     private var workspaceObservers: [NSObjectProtocol] = []
     private var isInactive = false
     private var postponedCallDescription: String?
+    private var lastBreakExerciseID: String?
 
     init(
         settings: SettingsStore = SettingsStore(),
@@ -218,10 +219,16 @@ final class AppModel: ObservableObject {
     }
 
     private func startBreak(from referenceDate: Date) {
+        let exercise = BreakExercise.random(excluding: lastBreakExerciseID)
+        lastBreakExerciseID = exercise.id
+
         phase = .breakTime
         deadline = referenceDate.addingTimeInterval(settings.breakDuration)
         secondsRemaining = Int(settings.breakDuration)
-        overlayController.show(subtitle: "Break ends in \(DurationFormatting.countdown(secondsRemaining)).")
+        overlayController.show(
+            exercise: exercise,
+            subtitle: "Break ends in \(DurationFormatting.countdown(secondsRemaining))."
+        )
     }
 
     private func attemptAutomaticBreak(from referenceDate: Date) {
