@@ -322,18 +322,6 @@ private struct ExerciseMotionCard: View {
             RoundedRectangle(cornerRadius: 38, style: .continuous)
                 .fill(Color.white.opacity(0.05))
 
-            Circle()
-                .fill(exercise.primaryTint.opacity(0.24))
-                .frame(width: 240, height: 240)
-                .blur(radius: 42)
-                .offset(x: -210, y: -54)
-
-            Circle()
-                .fill(exercise.secondaryTint.opacity(0.20))
-                .frame(width: 220, height: 220)
-                .blur(radius: 36)
-                .offset(x: 220, y: 72)
-
             RoundedRectangle(cornerRadius: 38, style: .continuous)
                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
 
@@ -353,7 +341,7 @@ private struct ExerciseMotionView: View {
                 let time = timeline.date.timeIntervalSinceReferenceDate
 
                 ZStack {
-                    ExerciseBackdrop(size: size, primaryTint: exercise.primaryTint, secondaryTint: exercise.secondaryTint)
+                    ExerciseBackdrop(primaryTint: exercise.primaryTint)
 
                     illustration(size: size, time: time)
                 }
@@ -451,9 +439,6 @@ private struct ExerciseMotionView: View {
                 thickness: 11
             )
 
-            GlowBlob(center: point(0.17, 0.28, in: size), diameter: 24, color: exercise.secondaryTint)
-            GlowBlob(center: point(0.83, 0.32, in: size), diameter: 18, color: exercise.secondaryTint)
-            GlowBlob(center: point(0.50, 0.18, in: size), diameter: 12, color: exercise.primaryTint)
         }
     }
 
@@ -467,8 +452,6 @@ private struct ExerciseMotionView: View {
         let rightElbow = point(0.67, 0.78, in: size)
 
         return ZStack {
-            GlowBlob(center: center, diameter: mix(80, 160, press), color: exercise.primaryTint)
-
             CapsuleMarker(center: leftPalm, width: 42, height: 126, angle: .degrees(-5), color: Color.white.opacity(0.86))
             CapsuleMarker(center: rightPalm, width: 42, height: 126, angle: .degrees(5), color: Color.white.opacity(0.86))
 
@@ -629,30 +612,12 @@ private struct ExerciseMotionView: View {
 }
 
 private struct ExerciseBackdrop: View {
-    let size: CGSize
     let primaryTint: Color
-    let secondaryTint: Color
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(primaryTint.opacity(0.08), style: StrokeStyle(lineWidth: 1, dash: [8, 12]))
-                .padding(12)
-
-            Circle()
-                .stroke(secondaryTint.opacity(0.09), lineWidth: 1)
-                .frame(width: min(size.width, size.height) * 0.62)
-
-            Circle()
-                .fill(primaryTint.opacity(0.16))
-                .frame(width: 10, height: 10)
-                .position(x: size.width * 0.16, y: size.height * 0.20)
-
-            Circle()
-                .fill(secondaryTint.opacity(0.14))
-                .frame(width: 8, height: 8)
-                .position(x: size.width * 0.86, y: size.height * 0.78)
-        }
+        RoundedRectangle(cornerRadius: 28, style: .continuous)
+            .stroke(primaryTint.opacity(0.08), style: StrokeStyle(lineWidth: 1, dash: [8, 12]))
+            .padding(12)
     }
 }
 
@@ -727,35 +692,17 @@ private struct SymbolMarker: View {
     }
 }
 
-private struct GlowBlob: View {
-    let center: CGPoint
-    let diameter: CGFloat
-    let color: Color
-
-    var body: some View {
-        Circle()
-            .fill(color.opacity(0.34))
-            .frame(width: diameter, height: diameter)
-            .blur(radius: diameter * 0.22)
-            .position(center)
-    }
-}
-
 private struct PalmGlyph: View {
     let center: CGPoint
     let angle: Angle
     let color: Color
 
     var body: some View {
-        ZStack {
-            Capsule()
-                .fill(color.opacity(0.88))
-                .frame(width: 68, height: 116)
-                .rotationEffect(angle)
-                .position(center)
-
-            GlowBlob(center: center, diameter: 64, color: color)
-        }
+        Capsule()
+            .fill(color.opacity(0.88))
+            .frame(width: 68, height: 116)
+            .rotationEffect(angle)
+            .position(center)
     }
 }
 
