@@ -46,6 +46,17 @@ struct MenuBarContentView: View {
                         .frame(width: 64, alignment: .trailing)
                 }
 
+                Text("Animation style")
+                    .font(.headline)
+                    .padding(.top, 2)
+
+                Picker("Animation style", selection: $settings.exerciseAnimationStyle) {
+                    ForEach(ExerciseAnimationStyle.allCases) { style in
+                        Text(style.title).tag(style)
+                    }
+                }
+                .pickerStyle(.segmented)
+
                 Toggle("Delay automatic breaks during calls", isOn: $settings.postponeDuringCallsEnabled)
                     .padding(.top, 2)
 

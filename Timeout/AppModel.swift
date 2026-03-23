@@ -139,6 +139,13 @@ final class AppModel: ObservableObject {
                 self?.handleCallSettingsChange()
             }
             .store(in: &cancellables)
+
+        settings.$exerciseAnimationStyle
+            .dropFirst()
+            .sink { [weak self] style in
+                self?.handleAnimationStyleChange(style)
+            }
+            .store(in: &cancellables)
     }
 
     private func handleCycleSettingsChange() {
@@ -170,6 +177,14 @@ final class AppModel: ObservableObject {
         }
 
         attemptAutomaticBreak(from: .now)
+    }
+
+    private func handleAnimationStyleChange(_ style: ExerciseAnimationStyle) {
+        guard !isInactive, phase == .breakTime else {
+            return
+        }
+
+        overlayController.updateAnimationStyle(style)
     }
 
     private func startTimer() {
@@ -227,6 +242,7 @@ final class AppModel: ObservableObject {
         secondsRemaining = Int(settings.breakDuration)
         overlayController.show(
             exercise: exercise,
+            animationStyle: settings.exerciseAnimationStyle,
             subtitle: "Break ends in \(DurationFormatting.countdown(secondsRemaining))."
         )
     }
