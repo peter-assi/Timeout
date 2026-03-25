@@ -3,6 +3,7 @@ import SwiftUI
 
 private let pictogramFigureColor = Color(red: 0.96, green: 0.92, blue: 0.78)
 private let pictogramAccentColor = Color(red: 0.99, green: 0.82, blue: 0.51)
+private let pictogramOutlineColor = Color(red: 0.28, green: 0.22, blue: 0.14)
 
 enum ExerciseAnimationStyle: String, CaseIterable, Identifiable {
     case classic
@@ -1092,6 +1093,7 @@ private struct StandingPictogramFigure: View {
 
     var body: some View {
         let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
+        let outline = shoulderDistance * 0.055
         let chest = midpoint(leftShoulder, rightShoulder)
         let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
         let hipOffset = shoulderDistance * 0.24
@@ -1105,8 +1107,64 @@ private struct StandingPictogramFigure: View {
         let footSpread = hipOffset * 1.18 * footSpreadScale
         let leftFoot = CGPoint(x: waist.x - footSpread, y: leftKnee.y + lowerLegLength)
         let rightFoot = CGPoint(x: waist.x + footSpread, y: rightKnee.y + lowerLegLength)
+        let jointDiameter = shoulderDistance * 0.17
+        let outlineJointDiameter = jointDiameter + outline * 2.4
+        let wristDiameter = shoulderDistance * 0.12
+        let outlineWristDiameter = wristDiameter + outline * 1.8
 
         return ZStack {
+            Ellipse()
+                .fill(pictogramOutlineColor)
+                .frame(width: shoulderDistance * 0.48 + outline * 2, height: shoulderDistance * 0.66 + outline * 2)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramOutlineColor, thickness: shoulderDistance * 0.15 + outline * 2)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92 * torsoWidthScale + outline * 2,
+                waistWidth: shoulderDistance * 0.56 + outline * 1.6
+            )
+            .fill(pictogramOutlineColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            JointView(center: leftShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+
+            if showsHands {
+                JointView(center: leftWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+                JointView(center: rightWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+            }
+
+            FootMarker(
+                center: leftFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+            FootMarker(
+                center: rightFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+
             Ellipse()
                 .fill(pictogramFigureColor)
                 .frame(width: shoulderDistance * 0.48, height: shoulderDistance * 0.66)
@@ -1132,13 +1190,22 @@ private struct StandingPictogramFigure: View {
             SegmentView(start: leftKnee, end: leftFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
             SegmentView(start: rightKnee, end: rightFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
 
+            JointView(center: leftShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightKnee, diameter: jointDiameter, color: pictogramFigureColor)
+
             if showsHands {
-                JointView(center: leftWrist, diameter: shoulderDistance * 0.12, color: pictogramFigureColor)
-                JointView(center: rightWrist, diameter: shoulderDistance * 0.12, color: pictogramFigureColor)
+                JointView(center: leftWrist, diameter: wristDiameter, color: pictogramFigureColor)
+                JointView(center: rightWrist, diameter: wristDiameter, color: pictogramFigureColor)
             }
 
-            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10)
-            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10)
+            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
         }
     }
 }
@@ -1155,6 +1222,7 @@ private struct SeatedPictogramFigure: View {
 
     var body: some View {
         let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
+        let outline = shoulderDistance * 0.055
         let chest = midpoint(leftShoulder, rightShoulder)
         let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
         let hipOffset = shoulderDistance * 0.24
@@ -1164,8 +1232,61 @@ private struct SeatedPictogramFigure: View {
         let rightKnee = CGPoint(x: waist.x + shoulderDistance * 0.16, y: waist.y + shoulderDistance * 0.28)
         let leftFoot = CGPoint(x: leftKnee.x - shoulderDistance * 0.08, y: leftKnee.y + shoulderDistance * 0.28)
         let rightFoot = CGPoint(x: rightKnee.x + shoulderDistance * 0.04, y: rightKnee.y + shoulderDistance * 0.28)
+        let jointDiameter = shoulderDistance * 0.17
+        let outlineJointDiameter = jointDiameter + outline * 2.4
+        let wristDiameter = shoulderDistance * 0.11
+        let outlineWristDiameter = wristDiameter + outline * 1.8
 
         return ZStack {
+            Ellipse()
+                .fill(pictogramOutlineColor)
+                .frame(width: shoulderDistance * 0.48 + outline * 2, height: shoulderDistance * 0.66 + outline * 2)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramOutlineColor, thickness: shoulderDistance * 0.15 + outline * 2)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92 + outline * 2,
+                waistWidth: shoulderDistance * 0.58 + outline * 1.6
+            )
+            .fill(pictogramOutlineColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            JointView(center: leftShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+            JointView(center: rightWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+
+            FootMarker(
+                center: leftFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+            FootMarker(
+                center: rightFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+
             Ellipse()
                 .fill(pictogramFigureColor)
                 .frame(width: shoulderDistance * 0.48, height: shoulderDistance * 0.66)
@@ -1191,11 +1312,19 @@ private struct SeatedPictogramFigure: View {
             SegmentView(start: leftKnee, end: leftFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
             SegmentView(start: rightKnee, end: rightFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
 
-            JointView(center: leftWrist, diameter: shoulderDistance * 0.11, color: pictogramFigureColor)
-            JointView(center: rightWrist, diameter: shoulderDistance * 0.11, color: pictogramFigureColor)
+            JointView(center: leftShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftWrist, diameter: wristDiameter, color: pictogramFigureColor)
+            JointView(center: rightWrist, diameter: wristDiameter, color: pictogramFigureColor)
 
-            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10)
-            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10)
+            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
         }
     }
 }
@@ -1289,10 +1418,11 @@ private struct FootMarker: View {
     let center: CGPoint
     let width: CGFloat
     let height: CGFloat
+    var color: Color = pictogramFigureColor
 
     var body: some View {
         RoundedRectangle(cornerRadius: height * 0.5, style: .continuous)
-            .fill(pictogramFigureColor)
+            .fill(color)
             .frame(width: width, height: height)
             .position(center)
     }
