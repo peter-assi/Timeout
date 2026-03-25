@@ -3,7 +3,7 @@ import SwiftUI
 
 private let pictogramFigureColor = Color(red: 0.96, green: 0.92, blue: 0.78)
 private let pictogramAccentColor = Color(red: 0.99, green: 0.82, blue: 0.51)
-private let pictogramOutlineColor = Color(red: 0.28, green: 0.22, blue: 0.14)
+private let pictogramOutlineColor = Color(red: 0.56, green: 0.43, blue: 0.25)
 
 enum ExerciseAnimationStyle: String, CaseIterable, Identifiable {
     case classic
@@ -1093,7 +1093,7 @@ private struct StandingPictogramFigure: View {
 
     var body: some View {
         let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
-        let outline = shoulderDistance * 0.055
+        let outline = shoulderDistance * 0.065
         let chest = midpoint(leftShoulder, rightShoulder)
         let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
         let hipOffset = shoulderDistance * 0.24
@@ -1222,7 +1222,7 @@ private struct SeatedPictogramFigure: View {
 
     var body: some View {
         let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
-        let outline = shoulderDistance * 0.055
+        let outline = shoulderDistance * 0.065
         let chest = midpoint(leftShoulder, rightShoulder)
         let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
         let hipOffset = shoulderDistance * 0.24
