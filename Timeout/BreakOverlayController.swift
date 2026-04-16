@@ -196,7 +196,8 @@ final class BreakOverlayController {
 
     func hide() {
         removeEscapeMonitor()
-        windows.forEach { $0.orderOut(nil) }
+        windows.forEach { $0.close() }
+        windows.removeAll()
     }
 
     private var preferredKeyWindow: NSWindow? {
@@ -465,7 +466,7 @@ private struct ExerciseMotionView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0 / 15.0)) { timeline in
                 let size = proxy.size
                 let time = timeline.date.timeIntervalSinceReferenceDate
 
