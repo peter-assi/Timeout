@@ -466,7 +466,7 @@ private struct ExerciseMotionView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            TimelineView(.animation(minimumInterval: 1.0 / 15.0)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { timeline in
                 let size = proxy.size
                 let time = timeline.date.timeIntervalSinceReferenceDate
 
