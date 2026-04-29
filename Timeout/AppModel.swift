@@ -19,11 +19,18 @@ final class AppModel: ObservableObject {
 
     private let callActivityDetector = CallActivityDetector()
     private let overlayController = BreakOverlayController()
-    private var deadline: Date?
-    private var timer: Timer?
+    private var deadline: Date? {
+        didSet {
+            scheduleDeadlineTimer()
+            updateCountdownRefreshTimer()
+        }
+    }
+    private var deadlineTimer: Timer?
+    private var countdownRefreshTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private var workspaceObservers: [NSObjectProtocol] = []
     private var isInactive = false
+    private var isMenuVisible = false
     private var postponedCallDescription: String?
     private var lastBreakExerciseID: String?
 
@@ -39,7 +46,6 @@ final class AppModel: ObservableObject {
 
         bindSettings()
         installWorkspaceObservers()
-        startTimer()
         launchAtLoginController.apply(desiredEnabled: settings.launchAtLoginEnabled)
         resumeWorkCycle(from: .now)
     }
@@ -102,6 +108,16 @@ final class AppModel: ObservableObject {
         }
 
         resumeWorkCycle(from: .now)
+    }
+
+    func setMenuVisible(_ isVisible: Bool) {
+        guard isMenuVisible != isVisible else {
+            return
+        }
+
+        isMenuVisible = isVisible
+        refreshDisplayedCountdown()
+        updateCountdownRefreshTimer()
     }
 
     private func bindSettings() {
@@ -187,41 +203,86 @@ final class AppModel: ObservableObject {
         overlayController.updateAnimationStyle(style)
     }
 
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.tick()
-            }
+    private func scheduleDeadlineTimer() {
+        deadlineTimer?.invalidate()
+        deadlineTimer = nil
+
+        guard let deadline else {
+            return
         }
 
-        RunLoop.main.add(timer!, forMode: .common)
+        let interval = max(0, deadline.timeIntervalSinceNow)
+        let timer = Timer(timeInterval: interval, repeats: false) { [weak self] _ in
+            Task { @MainActor in
+                self?.handleDeadlineTimer()
+            }
+        }
+        timer.tolerance = min(max(interval * 0.02, 0.05), 0.5)
+        deadlineTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
-    private func tick() {
+    private func updateCountdownRefreshTimer() {
+        let shouldRefreshCountdown = deadline != nil && (isMenuVisible || phase == .breakTime)
+
+        guard shouldRefreshCountdown != (countdownRefreshTimer != nil) else {
+            return
+        }
+
+        countdownRefreshTimer?.invalidate()
+        countdownRefreshTimer = nil
+
+        guard shouldRefreshCountdown else {
+            return
+        }
+
+        let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshDisplayedCountdown()
+            }
+        }
+        timer.tolerance = 0.1
+        countdownRefreshTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    private func handleDeadlineTimer() {
+        guard let deadline else {
+            return
+        }
+
+        guard deadline <= Date() else {
+            scheduleDeadlineTimer()
+            return
+        }
+
+        let referenceDate = Date()
+        refreshDisplayedCountdown()
+
+        switch phase {
+        case .monitoring:
+            attemptAutomaticBreak(from: referenceDate)
+        case .breakTime:
+            resumeWorkCycle(from: referenceDate)
+        case .postponedForCall:
+            attemptAutomaticBreak(from: referenceDate)
+        case .paused:
+            break
+        }
+    }
+
+    private func refreshDisplayedCountdown() {
         guard let deadline else {
             return
         }
 
         let remaining = max(0, Int(ceil(deadline.timeIntervalSinceNow)))
-        secondsRemaining = remaining
+        if isMenuVisible && secondsRemaining != remaining {
+            secondsRemaining = remaining
+        }
 
         if phase == .breakTime {
             overlayController.updateSubtitle("Break ends in \(DurationFormatting.countdown(remaining)).")
-        }
-
-        guard remaining == 0 else {
-            return
-        }
-
-        switch phase {
-        case .monitoring:
-            attemptAutomaticBreak(from: .now)
-        case .breakTime:
-            resumeWorkCycle(from: .now)
-        case .postponedForCall:
-            attemptAutomaticBreak(from: .now)
-        case .paused:
-            break
         }
     }
 
