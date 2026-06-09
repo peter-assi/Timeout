@@ -19,10 +19,13 @@ struct BreakExercise: Identifiable {
         case prayerPress
         case forearmRotations
         case keyboardShakeout
+        case tricepsReach
         case shoulderRolls
         case wallAngels
         case elbowOpeners
+        case goalpostPullbacks
         case scapularSqueeze
+        case latSideStretch
         case seatedTwist
     }
 
@@ -90,6 +93,15 @@ struct BreakExercise: Identifiable {
             secondaryTint: Color(red: 1.0, green: 0.85, blue: 0.48)
         ),
         BreakExercise(
+            id: "triceps-reach",
+            title: "Triceps Reach",
+            instruction: "Reach one arm overhead, bend the elbow gently, then switch sides.",
+            focusArea: .arms,
+            motionStyle: .tricepsReach,
+            primaryTint: Color(red: 0.94, green: 0.78, blue: 1.0),
+            secondaryTint: Color(red: 0.58, green: 0.88, blue: 1.0)
+        ),
+        BreakExercise(
             id: "shoulder-rolls",
             title: "Shoulder Rolls",
             instruction: "Roll both shoulders up, back, and down in a smooth loop.",
@@ -117,6 +129,15 @@ struct BreakExercise: Identifiable {
             secondaryTint: Color(red: 1.0, green: 0.84, blue: 0.61)
         ),
         BreakExercise(
+            id: "goalpost-pullbacks",
+            title: "Goalpost Pullbacks",
+            instruction: "Raise the elbows like goalposts and gently draw them back without shrugging.",
+            focusArea: .back,
+            motionStyle: .goalpostPullbacks,
+            primaryTint: Color(red: 1.0, green: 0.76, blue: 0.62),
+            secondaryTint: Color(red: 0.95, green: 0.91, blue: 0.64)
+        ),
+        BreakExercise(
             id: "scapular-squeeze",
             title: "Scapular Squeeze",
             instruction: "Lift the chest and gently pull the elbows back to wake up the upper back.",
@@ -124,6 +145,15 @@ struct BreakExercise: Identifiable {
             motionStyle: .scapularSqueeze,
             primaryTint: Color(red: 0.88, green: 0.74, blue: 0.45),
             secondaryTint: Color(red: 0.95, green: 0.91, blue: 0.64)
+        ),
+        BreakExercise(
+            id: "lat-side-stretch",
+            title: "Lat Side Stretch",
+            instruction: "Reach overhead and lean side to side to stretch the upper back.",
+            focusArea: .back,
+            motionStyle: .latSideStretch,
+            primaryTint: Color(red: 0.65, green: 0.95, blue: 1.0),
+            secondaryTint: Color(red: 0.72, green: 0.86, blue: 1.0)
         ),
         BreakExercise(
             id: "seated-twist",
@@ -136,9 +166,19 @@ struct BreakExercise: Identifiable {
         )
     ]
 
+    private static let newlyAddedExerciseIDs: Set<String> = [
+        "triceps-reach",
+        "goalpost-pullbacks",
+        "lat-side-stretch"
+    ]
+
     static func random(excluding previousExerciseID: String? = nil) -> BreakExercise {
         let candidates = all.filter { $0.id != previousExerciseID }
-        return candidates.randomElement() ?? all[0]
+        let weightedCandidates = candidates.flatMap { exercise in
+            newlyAddedExerciseIDs.contains(exercise.id) ? [exercise, exercise] : [exercise]
+        }
+
+        return weightedCandidates.randomElement() ?? all[0]
     }
 }
 
@@ -410,14 +450,20 @@ private struct ExerciseMotionView: View {
             humanForearmRotations(size: size, time: time)
         case .keyboardShakeout:
             humanKeyboardShakeout(size: size, time: time)
+        case .tricepsReach:
+            humanTricepsReach(size: size, time: time)
         case .shoulderRolls:
             humanShoulderRolls(size: size, time: time)
         case .wallAngels:
             humanWallAngels(size: size, time: time)
         case .elbowOpeners:
             humanElbowOpeners(size: size, time: time)
+        case .goalpostPullbacks:
+            humanGoalpostPullbacks(size: size, time: time)
         case .scapularSqueeze:
             humanScapularSqueeze(size: size, time: time)
+        case .latSideStretch:
+            humanLatSideStretch(size: size, time: time)
         case .seatedTwist:
             humanSeatedTwist(size: size, time: time)
         }
@@ -572,6 +618,36 @@ private struct ExerciseMotionView: View {
                     thickness: 4
                 )
             }
+        }
+    }
+
+    private func humanTricepsReach(size: CGSize, time: TimeInterval) -> some View {
+        let switchSide = pulse(time, speed: 0.82)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(mix(0.36, 0.49, switchSide), mix(0.45, 0.15, switchSide), in: size)
+        let rightElbow = point(1 - mix(0.49, 0.36, switchSide), mix(0.15, 0.45, switchSide), in: size)
+        let leftWrist = point(mix(0.37, 0.51, switchSide), mix(0.56, 0.29, switchSide), in: size)
+        let rightWrist = point(1 - mix(0.51, 0.37, switchSide), mix(0.29, 0.56, switchSide), in: size)
+
+        return ZStack {
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.96,
+                footSpreadScale: 0.92
+            )
+
+            ArrowLineMarker(start: point(0.26, 0.24, in: size), end: point(0.38, 0.14, in: size), lineWidth: 4)
+            ArrowLineMarker(start: point(0.74, 0.24, in: size), end: point(0.62, 0.14, in: size), lineWidth: 4)
         }
     }
 
@@ -742,6 +818,36 @@ private struct ExerciseMotionView: View {
         }
     }
 
+    private func humanGoalpostPullbacks(size: CGSize, time: TimeInterval) -> some View {
+        let pull = pulse(time, speed: 1.2)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(mix(0.44, 0.41, pull), mix(0.30, 0.28, pull), in: size)
+        let rightShoulder = point(1 - mix(0.44, 0.41, pull), mix(0.30, 0.28, pull), in: size)
+        let leftElbow = point(mix(0.38, 0.31, pull), mix(0.31, 0.29, pull), in: size)
+        let rightElbow = point(1 - mix(0.38, 0.31, pull), mix(0.31, 0.29, pull), in: size)
+        let leftWrist = point(mix(0.38, 0.31, pull), mix(0.46, 0.43, pull), in: size)
+        let rightWrist = point(1 - mix(0.38, 0.31, pull), mix(0.46, 0.43, pull), in: size)
+
+        return ZStack {
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 1.04,
+                footSpreadScale: 1.00
+            )
+
+            ArrowLineMarker(start: point(0.40, 0.22, in: size), end: point(0.31, 0.22, in: size), lineWidth: 4)
+            ArrowLineMarker(start: point(0.60, 0.22, in: size), end: point(0.69, 0.22, in: size), lineWidth: 4)
+        }
+    }
+
     private func humanScapularSqueeze(size: CGSize, time: TimeInterval) -> some View {
         let squeeze = pulse(time, speed: 1.3)
         let neck = point(0.50, 0.17, in: size)
@@ -769,6 +875,36 @@ private struct ExerciseMotionView: View {
 
             ArrowLineMarker(start: point(0.38, 0.24, in: size), end: point(0.46, 0.24, in: size), lineWidth: 4)
             ArrowLineMarker(start: point(0.62, 0.24, in: size), end: point(0.54, 0.24, in: size), lineWidth: 4)
+        }
+    }
+
+    private func humanLatSideStretch(size: CGSize, time: TimeInterval) -> some View {
+        let lean = CGFloat(sin(time * 1.0)) * 0.24
+        let waist = point(0.50, 0.59, in: size)
+        let neck = rotate(point(0.50, 0.17, in: size), around: waist, by: lean)
+        let leftShoulder = rotate(point(0.44, 0.30, in: size), around: waist, by: lean)
+        let rightShoulder = rotate(point(0.56, 0.30, in: size), around: waist, by: lean)
+        let leftElbow = rotate(point(0.42, 0.18, in: size), around: waist, by: lean)
+        let rightElbow = rotate(point(0.58, 0.18, in: size), around: waist, by: lean)
+        let leftWrist = rotate(point(0.40, 0.08, in: size), around: waist, by: lean)
+        let rightWrist = rotate(point(0.60, 0.08, in: size), around: waist, by: lean)
+
+        return ZStack {
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.94,
+                footSpreadScale: 1.02
+            )
+
+            ArrowLineMarker(start: point(0.39, 0.13, in: size), end: point(0.28, 0.13, in: size), lineWidth: 4)
+            ArrowLineMarker(start: point(0.61, 0.13, in: size), end: point(0.72, 0.13, in: size), lineWidth: 4)
         }
     }
 
