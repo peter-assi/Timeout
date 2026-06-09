@@ -49,7 +49,10 @@ jobs:
           test -d "${app_path}"
           mkdir -p "${release_dir}"
           ditto -c -k --sequesterRsrc --keepParent "${app_path}" "${zip_path}"
-          shasum -a 256 "${zip_path}" > "${zip_path}.sha256"
+          (
+            cd "${release_dir}"
+            shasum -a 256 'Timeout.zip' > 'Timeout.zip.sha256'
+          )
 
       - name: Publish GitHub release
         env:
