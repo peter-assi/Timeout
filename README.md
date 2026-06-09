@@ -23,10 +23,10 @@ The built app bundle lands at `build/DerivedData/Build/Products/Debug/Timeout!.a
 
 ## Install the Release build
 
-Every push to `main` builds the Release configuration and publishes a GitHub Release with a `Timeout!.zip` asset.
+Every push to `main` builds the Release configuration and publishes a GitHub Release with a `Timeout.zip` asset.
 
-1. Open [Releases](https://github.com/peter-assi/Timeout/releases) and download `Timeout!.zip` from the latest release.
-2. Unzip `Timeout!.zip`.
+1. Open [Releases](https://github.com/peter-assi/Timeout/releases) and download `Timeout.zip` from the latest release.
+2. Unzip `Timeout.zip`.
 3. Drag `Timeout!.app` into `/Applications`.
 4. Open `Timeout!.app` from `/Applications`.
 5. If macOS blocks the app because it cannot verify the developer, open System Settings -> Privacy & Security and click `Open Anyway` for `Timeout!`. Confirm the prompt, then open the app again.

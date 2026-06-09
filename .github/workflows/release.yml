@@ -44,7 +44,7 @@ jobs:
 
           app_path='build/DerivedData/Build/Products/Release/Timeout!.app'
           release_dir='build/release'
-          zip_path="${release_dir}/Timeout!.zip"
+          zip_path="${release_dir}/Timeout.zip"
 
           test -d "${app_path}"
           mkdir -p "${release_dir}"
@@ -65,5 +65,5 @@ jobs:
             --title "Timeout! ${short_sha}" \
             --notes "Automated Release build for commit ${GITHUB_SHA} on main. This app is unsigned and not notarized, so macOS will ask for approval on first launch." \
             --latest \
-            'build/release/Timeout!.zip#Timeout!.zip' \
-            'build/release/Timeout!.zip.sha256#Timeout!.zip.sha256'
+            'build/release/Timeout.zip#Timeout.zip' \
+            'build/release/Timeout.zip.sha256#Timeout.zip.sha256'
