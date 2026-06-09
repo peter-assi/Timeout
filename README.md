@@ -2,6 +2,8 @@
 
 `Timeout!` is a native macOS menubar app that schedules short movement breaks while you work.
 
+![Timeout break overlay](docs/assets/timeout-overlay.png)
+
 ## MVP
 
 - Menubar app with no Dock icon
