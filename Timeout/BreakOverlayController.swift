@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
 
+private let pictogramFigureColor = Color(red: 0.96, green: 0.92, blue: 0.78)
+private let pictogramAccentColor = Color(red: 0.99, green: 0.82, blue: 0.51)
+private let pictogramOutlineColor = Color(red: 0.56, green: 0.43, blue: 0.25)
+
 struct BreakExercise: Identifiable {
     enum FocusArea: String {
         case hands = "Hands"
@@ -271,7 +275,7 @@ struct BreakOverlayScreen: View {
         GeometryReader { proxy in
             ZStack {
                 overlayBackground
-                classicLayout(size: proxy.size)
+                pictogramLayout(size: proxy.size)
             }
         }
     }
@@ -286,17 +290,17 @@ struct BreakOverlayScreen: View {
     }
 
     @ViewBuilder
-    private func classicLayout(size: CGSize) -> some View {
-        let titleSize = min(max(size.height * 0.14, 112), 156)
+    private func pictogramLayout(size: CGSize) -> some View {
+        let titleSize = min(max(size.height * 0.16, 128), 180)
         let focusSize = min(max(size.height * 0.018, 16), 20)
-        let exerciseTitleSize = min(max(size.height * 0.05, 40), 58)
-        let instructionSize = min(max(size.height * 0.03, 24), 32)
-        let subtitleSize = min(max(size.height * 0.026, 20), 28)
-        let stageWidth = min(size.width * 0.66, 920)
-        let stageHeight = min(size.height * 0.34, 360)
+        let exerciseTitleSize = min(max(size.height * 0.046, 38), 56)
+        let instructionSize = min(max(size.height * 0.026, 22), 30)
+        let subtitleSize = min(max(size.height * 0.024, 18), 24)
+        let stageWidth = min(size.width * 0.54, 720)
+        let stageHeight = min(size.height * 0.31, 340)
 
-        VStack(spacing: 22) {
-            Spacer(minLength: 8)
+        VStack(spacing: 18) {
+            Spacer(minLength: 0)
 
             Text("Timeout!")
                 .font(overlayFont("AppleSDGothicNeo-Heavy", size: titleSize, fallbackWeight: .black))
@@ -308,15 +312,15 @@ struct BreakOverlayScreen: View {
                 .font(overlayFont("AppleSDGothicNeo-Bold", size: focusSize, fallbackWeight: .bold))
                 .kerning(3)
                 .padding(.horizontal, 18)
-                .padding(.vertical, 10)
-                .background(Capsule().fill(content.exercise.primaryTint.opacity(0.18)))
+                .padding(.vertical, 9)
+                .background(Capsule().fill(pictogramAccentColor.opacity(0.18)))
                 .overlay(
                     Capsule()
-                        .stroke(content.exercise.primaryTint.opacity(0.42), lineWidth: 1)
+                        .stroke(pictogramAccentColor.opacity(0.42), lineWidth: 1)
                 )
-                .foregroundStyle(content.exercise.primaryTint)
+                .foregroundStyle(pictogramAccentColor)
 
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 Text(content.exercise.title)
                     .font(overlayFont("AppleSDGothicNeo-Heavy", size: exerciseTitleSize, fallbackWeight: .black))
                     .foregroundStyle(.white)
@@ -325,24 +329,24 @@ struct BreakOverlayScreen: View {
 
                 Text(content.exercise.instruction)
                     .font(overlayFont("AppleSDGothicNeo-Medium", size: instructionSize, fallbackWeight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.82))
+                    .foregroundStyle(Color.white.opacity(0.80))
                     .multilineTextAlignment(.center)
-                    .lineSpacing(6)
-                    .frame(maxWidth: min(size.width * 0.72, 960))
+                    .lineSpacing(5)
+                    .frame(maxWidth: min(size.width * 0.60, 760))
             }
 
             ExerciseMotionCard(exercise: content.exercise)
-            .frame(width: stageWidth, height: stageHeight)
+                .frame(width: stageWidth, height: stageHeight)
 
             Text(content.subtitle)
                 .font(overlayFont("AppleSDGothicNeo-Bold", size: subtitleSize, fallbackWeight: .bold))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .multilineTextAlignment(.center)
 
-            Spacer(minLength: 10)
+            Spacer(minLength: 0)
         }
         .padding(.horizontal, 72)
-        .padding(.vertical, 48)
+        .padding(.vertical, 42)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
@@ -360,14 +364,18 @@ private struct ExerciseMotionCard: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 38, style: .continuous)
-                .fill(Color.white.opacity(0.05))
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(Color.black.opacity(0.98))
 
-            RoundedRectangle(cornerRadius: 38, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .stroke(Color.black.opacity(0.98), lineWidth: 1)
+
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.07), style: StrokeStyle(lineWidth: 1, dash: [8, 12]))
+                .padding(22)
 
             ExerciseMotionView(exercise: exercise)
-                .padding(26)
+                .padding(20)
         }
     }
 }
@@ -381,408 +389,846 @@ private struct ExerciseMotionView: View {
                 let size = proxy.size
                 let time = timeline.date.timeIntervalSinceReferenceDate
 
-                ZStack {
-                    ExerciseBackdrop(primaryTint: exercise.primaryTint)
-                    illustration(size: size, time: time)
-                }
-                .frame(width: size.width, height: size.height)
+                humanIllustration(size: size, time: time)
+                    .frame(width: size.width, height: size.height)
             }
         }
     }
 
     @ViewBuilder
-    private func illustration(size: CGSize, time: TimeInterval) -> some View {
+    private func humanIllustration(size: CGSize, time: TimeInterval) -> some View {
         switch exercise.motionStyle {
         case .wristCircles:
-            wristCircles(size: size, time: time)
+            humanWristCircles(size: size, time: time)
         case .wristWaves:
-            wristWaves(size: size, time: time)
+            humanWristWaves(size: size, time: time)
         case .fingerFan:
-            fingerFan(size: size, time: time)
+            humanFingerFan(size: size, time: time)
         case .prayerPress:
-            prayerPress(size: size, time: time)
+            humanPrayerPress(size: size, time: time)
         case .forearmRotations:
-            forearmRotations(size: size, time: time)
+            humanForearmRotations(size: size, time: time)
         case .keyboardShakeout:
-            keyboardShakeout(size: size, time: time)
+            humanKeyboardShakeout(size: size, time: time)
         case .shoulderRolls:
-            shoulderRolls(size: size, time: time)
+            humanShoulderRolls(size: size, time: time)
         case .wallAngels:
-            wallAngels(size: size, time: time)
+            humanWallAngels(size: size, time: time)
         case .elbowOpeners:
-            elbowOpeners(size: size, time: time)
+            humanElbowOpeners(size: size, time: time)
         case .scapularSqueeze:
-            scapularSqueeze(size: size, time: time)
+            humanScapularSqueeze(size: size, time: time)
         case .seatedTwist:
-            seatedTwist(size: size, time: time)
+            humanSeatedTwist(size: size, time: time)
         }
     }
 
-    private func wristCircles(size: CGSize, time: TimeInterval) -> some View {
-        let angle = CGFloat(time * 1.7)
-        let orbitRadius: CGFloat = min(size.width, size.height) * 0.07
-        let leftBase = point(0.31, 0.46, in: size)
-        let rightBase = point(0.69, 0.46, in: size)
-        let leftElbow = point(0.42, 0.76, in: size)
-        let rightElbow = point(0.58, 0.76, in: size)
-        let leftHand = CGPoint(x: leftBase.x + cos(angle) * orbitRadius, y: leftBase.y + sin(angle) * orbitRadius)
-        let rightHand = CGPoint(x: rightBase.x - cos(angle) * orbitRadius, y: rightBase.y + sin(angle) * orbitRadius)
+    private func humanWristCircles(size: CGSize, time: TimeInterval) -> some View {
+        let orbit = CGFloat(time * 1.6)
+        let orbitRadius: CGFloat = min(size.width, size.height) * 0.048
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.42, 0.46, in: size)
+        let rightElbow = point(0.58, 0.46, in: size)
+        let leftWristBase = point(0.40, 0.35, in: size)
+        let rightWristBase = point(0.60, 0.35, in: size)
+        let leftWrist = CGPoint(x: leftWristBase.x + cos(orbit) * orbitRadius, y: leftWristBase.y + sin(orbit) * orbitRadius)
+        let rightWrist = CGPoint(x: rightWristBase.x - cos(orbit) * orbitRadius, y: rightWristBase.y + sin(orbit) * orbitRadius)
 
         return ZStack {
-            MotionRing(center: leftBase, diameter: orbitRadius * 2.6, color: exercise.primaryTint)
-            MotionRing(center: rightBase, diameter: orbitRadius * 2.6, color: exercise.primaryTint)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                footSpreadScale: 0.90
+            )
 
-            SegmentView(start: leftElbow, end: leftHand, color: Color.white.opacity(0.76), thickness: 24)
-            SegmentView(start: rightElbow, end: rightHand, color: Color.white.opacity(0.76), thickness: 24)
-
-            JointView(center: leftElbow, diameter: 18, color: exercise.secondaryTint)
-            JointView(center: rightElbow, diameter: 18, color: exercise.secondaryTint)
-
-            HandGlyph(center: leftHand, angle: .radians(Double(angle) + 0.4), color: exercise.primaryTint)
-            HandGlyph(center: rightHand, angle: .radians(-Double(angle) - 0.4), color: exercise.primaryTint)
-
-            SymbolMarker(name: "arrow.clockwise", center: point(0.21, 0.28, in: size), size: 28, color: exercise.primaryTint)
-            SymbolMarker(name: "arrow.counterclockwise", center: point(0.79, 0.28, in: size), size: 28, color: exercise.primaryTint)
+            CurvedArrowMarker(center: leftWristBase, radius: orbitRadius * 1.55, startDegrees: 220, endDegrees: 20, lineWidth: 4)
+            CurvedArrowMarker(center: rightWristBase, radius: orbitRadius * 1.55, startDegrees: 160, endDegrees: -40, lineWidth: 4)
         }
     }
 
-    private func wristWaves(size: CGSize, time: TimeInterval) -> some View {
-        let wave = CGFloat(sin(time * 2.1)) * 0.58
-        let leftElbow = point(0.33, 0.76, in: size)
-        let rightElbow = point(0.67, 0.76, in: size)
-        let leftWrist = point(0.39, 0.48, in: size)
-        let rightWrist = point(0.61, 0.48, in: size)
+    private func humanWristWaves(size: CGSize, time: TimeInterval) -> some View {
+        let wave = CGFloat(sin(time * 2.1)) * 0.62
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.42, 0.47, in: size)
+        let rightElbow = point(0.58, 0.47, in: size)
+        let leftWrist = point(0.38, 0.35, in: size)
+        let rightWrist = point(0.62, 0.35, in: size)
         let leftHandAngle = -.pi / 2 + wave
         let rightHandAngle = -.pi / 2 - wave
-        let leftHand = translated(leftWrist, by: vector(length: 46, angle: leftHandAngle))
-        let rightHand = translated(rightWrist, by: vector(length: 46, angle: rightHandAngle))
+        let leftHand = translated(leftWrist, by: vector(length: 25, angle: leftHandAngle))
+        let rightHand = translated(rightWrist, by: vector(length: 25, angle: rightHandAngle))
 
         return ZStack {
-            MotionRing(center: leftWrist, diameter: 86, color: exercise.primaryTint)
-            MotionRing(center: rightWrist, diameter: 86, color: exercise.primaryTint)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.94,
+                footSpreadScale: 0.90,
+                showsHands: false
+            )
 
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.secondaryTint.opacity(0.84), thickness: 24)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.secondaryTint.opacity(0.84), thickness: 24)
+            HandGlyph(center: leftHand, angle: .radians(Double(leftHandAngle + .pi / 2)), color: pictogramFigureColor, scale: 0.48)
+            HandGlyph(center: rightHand, angle: .radians(Double(rightHandAngle + .pi / 2)), color: pictogramFigureColor, scale: 0.48)
 
-            JointView(center: leftElbow, diameter: 18, color: exercise.secondaryTint)
-            JointView(center: rightElbow, diameter: 18, color: exercise.secondaryTint)
-            JointView(center: leftWrist, diameter: 22, color: exercise.primaryTint)
-            JointView(center: rightWrist, diameter: 22, color: exercise.primaryTint)
-
-            HandGlyph(center: leftHand, angle: .radians(Double(leftHandAngle + .pi / 2)), color: Color.white.opacity(0.92), scale: 0.82)
-            HandGlyph(center: rightHand, angle: .radians(Double(rightHandAngle + .pi / 2)), color: Color.white.opacity(0.92), scale: 0.82)
-
-            SymbolMarker(name: "arrow.up.and.down.circle.fill", center: point(0.50, 0.24, in: size), size: 34, color: exercise.primaryTint)
+            ArrowLineMarker(start: CGPoint(x: leftWrist.x - 42, y: leftWrist.y + 22), end: CGPoint(x: leftWrist.x - 42, y: leftWrist.y - 26), lineWidth: 4)
+            ArrowLineMarker(start: CGPoint(x: rightWrist.x + 42, y: rightWrist.y - 26), end: CGPoint(x: rightWrist.x + 42, y: rightWrist.y + 22), lineWidth: 4)
         }
     }
 
-    private func fingerFan(size: CGSize, time: TimeInterval) -> some View {
-        let spread = mix(0.18, 0.34, pulse(time, speed: 1.8))
-        let leftPalm = point(0.33, 0.66, in: size)
-        let rightPalm = point(0.67, 0.66, in: size)
-
-        return ZStack {
-            PalmGlyph(center: leftPalm, angle: .degrees(-12), color: exercise.primaryTint)
-            PalmGlyph(center: rightPalm, angle: .degrees(12), color: exercise.primaryTint)
-
-            ForEach(-2...2, id: \.self) { index in
-                let factor = CGFloat(index)
-                let leftStart = CGPoint(x: leftPalm.x + factor * 7, y: leftPalm.y - 48)
-                let leftEnd = translated(
-                    leftStart,
-                    by: vector(length: 58 - CGFloat(abs(index)) * 4, angle: -.pi / 2 + factor * spread - 0.08)
-                )
-                let rightStart = CGPoint(x: rightPalm.x - factor * 7, y: rightPalm.y - 48)
-                let rightEnd = translated(
-                    rightStart,
-                    by: vector(length: 58 - CGFloat(abs(index)) * 4, angle: -.pi / 2 - factor * spread + 0.08)
-                )
-
-                SegmentView(start: leftStart, end: leftEnd, color: Color.white.opacity(0.82), thickness: 11)
-                SegmentView(start: rightStart, end: rightEnd, color: Color.white.opacity(0.82), thickness: 11)
-            }
-
-            SegmentView(
-                start: CGPoint(x: leftPalm.x - 24, y: leftPalm.y - 8),
-                end: CGPoint(x: leftPalm.x - 58, y: leftPalm.y - 22),
-                color: Color.white.opacity(0.82),
-                thickness: 11
-            )
-            SegmentView(
-                start: CGPoint(x: rightPalm.x + 24, y: rightPalm.y - 8),
-                end: CGPoint(x: rightPalm.x + 58, y: rightPalm.y - 22),
-                color: Color.white.opacity(0.82),
-                thickness: 11
-            )
-
-        }
-    }
-
-    private func prayerPress(size: CGSize, time: TimeInterval) -> some View {
-        let press = pulse(time, speed: 1.4)
-        let palmOffset = mix(64, 24, press)
-        let center = point(0.50, 0.54, in: size)
-        let leftPalm = CGPoint(x: center.x - palmOffset, y: center.y)
-        let rightPalm = CGPoint(x: center.x + palmOffset, y: center.y)
-        let leftElbow = point(0.33, 0.78, in: size)
-        let rightElbow = point(0.67, 0.78, in: size)
-
-        return ZStack {
-            CapsuleMarker(center: leftPalm, width: 42, height: 126, angle: .degrees(-5), color: Color.white.opacity(0.86))
-            CapsuleMarker(center: rightPalm, width: 42, height: 126, angle: .degrees(5), color: Color.white.opacity(0.86))
-
-            SegmentView(
-                start: leftElbow,
-                end: CGPoint(x: leftPalm.x - 8, y: leftPalm.y + 54),
-                color: exercise.secondaryTint.opacity(0.82),
-                thickness: 20
-            )
-            SegmentView(
-                start: rightElbow,
-                end: CGPoint(x: rightPalm.x + 8, y: rightPalm.y + 54),
-                color: exercise.secondaryTint.opacity(0.82),
-                thickness: 20
-            )
-
-            SymbolMarker(name: "arrow.left.and.right.circle.fill", center: point(0.50, 0.24, in: size), size: 34, color: exercise.primaryTint)
-        }
-    }
-
-    private func forearmRotations(size: CGSize, time: TimeInterval) -> some View {
+    private func humanForearmRotations(size: CGSize, time: TimeInterval) -> some View {
         let turn = pulse(time, speed: 1.65)
-        let palmWidth = mix(76, 34, turn)
-        let palmHeight = mix(24, 74, turn)
-        let leftElbow = point(0.32, 0.68, in: size)
-        let rightElbow = point(0.68, 0.68, in: size)
-        let leftWrist = point(0.43, 0.48, in: size)
-        let rightWrist = point(0.57, 0.48, in: size)
+        let palmWidth = mix(38, 18, turn)
+        let palmHeight = mix(14, 42, turn)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.41, 0.48, in: size)
+        let rightElbow = point(0.59, 0.48, in: size)
+        let leftWrist = point(0.45, 0.34, in: size)
+        let rightWrist = point(0.55, 0.34, in: size)
 
         return ZStack {
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.secondaryTint.opacity(0.82), thickness: 24)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.secondaryTint.opacity(0.82), thickness: 24)
-
-            JointView(center: leftElbow, diameter: 18, color: exercise.secondaryTint)
-            JointView(center: rightElbow, diameter: 18, color: exercise.secondaryTint)
-            JointView(center: leftWrist, diameter: 18, color: exercise.primaryTint)
-            JointView(center: rightWrist, diameter: 18, color: exercise.primaryTint)
-
-            CapsuleMarker(center: leftWrist, width: palmWidth, height: palmHeight, angle: .degrees(-8), color: Color.white.opacity(0.90))
-            CapsuleMarker(center: rightWrist, width: palmWidth, height: palmHeight, angle: .degrees(8), color: Color.white.opacity(0.90))
-
-            SegmentView(
-                start: CGPoint(x: leftWrist.x - palmWidth * 0.22, y: leftWrist.y + palmHeight * 0.20),
-                end: CGPoint(x: leftWrist.x - palmWidth * 0.42, y: leftWrist.y + palmHeight * 0.28),
-                color: exercise.primaryTint.opacity(0.94),
-                thickness: 8
-            )
-            SegmentView(
-                start: CGPoint(x: rightWrist.x + palmWidth * 0.22, y: rightWrist.y + palmHeight * 0.20),
-                end: CGPoint(x: rightWrist.x + palmWidth * 0.42, y: rightWrist.y + palmHeight * 0.28),
-                color: exercise.primaryTint.opacity(0.94),
-                thickness: 8
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.94,
+                footSpreadScale: 0.90,
+                showsHands: false
             )
 
-            SymbolMarker(name: "arrow.triangle.2.circlepath", center: point(0.50, 0.24, in: size), size: 32, color: exercise.primaryTint)
+            CapsuleMarker(center: leftWrist, width: palmWidth, height: palmHeight, angle: .degrees(-8), color: pictogramFigureColor)
+            CapsuleMarker(center: rightWrist, width: palmWidth, height: palmHeight, angle: .degrees(8), color: pictogramFigureColor)
+
+            CurvedArrowMarker(center: CGPoint(x: leftWrist.x - 28, y: leftWrist.y + 4), radius: 20, startDegrees: 230, endDegrees: 40, lineWidth: 4)
+            CurvedArrowMarker(center: CGPoint(x: rightWrist.x + 28, y: rightWrist.y + 4), radius: 20, startDegrees: 130, endDegrees: -60, lineWidth: 4)
         }
     }
 
-    private func keyboardShakeout(size: CGSize, time: TimeInterval) -> some View {
-        let leftShake = CGPoint(x: CGFloat(sin(time * 11.0)) * 10, y: CGFloat(cos(time * 8.5)) * 8)
-        let rightShake = CGPoint(x: CGFloat(cos(time * 10.0)) * 10, y: CGFloat(sin(time * 9.0)) * 8)
-        let neck = point(0.50, 0.28, in: size)
-        let waist = point(0.50, 0.72, in: size)
-        let leftShoulder = point(0.42, 0.38, in: size)
-        let rightShoulder = point(0.58, 0.38, in: size)
-        let leftElbow = point(0.33, 0.56, in: size)
-        let rightElbow = point(0.67, 0.56, in: size)
-        let leftWristBase = point(0.29, 0.76, in: size)
-        let rightWristBase = point(0.71, 0.76, in: size)
+    private func humanKeyboardShakeout(size: CGSize, time: TimeInterval) -> some View {
+        let leftShake = CGPoint(x: CGFloat(sin(time * 11.0)) * 7, y: CGFloat(cos(time * 8.5)) * 5)
+        let rightShake = CGPoint(x: CGFloat(cos(time * 10.0)) * 7, y: CGFloat(sin(time * 9.0)) * 5)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.56, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.36, 0.45, in: size)
+        let rightElbow = point(0.64, 0.45, in: size)
+        let leftWristBase = point(0.33, 0.60, in: size)
+        let rightWristBase = point(0.67, 0.60, in: size)
         let leftWrist = CGPoint(x: leftWristBase.x + leftShake.x, y: leftWristBase.y + leftShake.y)
         let rightWrist = CGPoint(x: rightWristBase.x + rightShake.x, y: rightWristBase.y + rightShake.y)
 
         return ZStack {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.white.opacity(0.08))
-                .frame(width: min(size.width * 0.36, 260), height: 24)
-                .position(x: size.width * 0.50, y: size.height * 0.90)
-
-            SegmentView(start: neck, end: waist, color: Color.white.opacity(0.78), thickness: 28)
-            SegmentView(start: leftShoulder, end: leftElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: rightShoulder, end: rightElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-
-            JointView(center: neck, diameter: 44, color: Color.white.opacity(0.94))
-            JointView(center: leftShoulder, diameter: 20, color: exercise.secondaryTint)
-            JointView(center: rightShoulder, diameter: 20, color: exercise.secondaryTint)
-            HandGlyph(center: leftWrist, angle: .degrees(-22), color: Color.white.opacity(0.92), scale: 0.70)
-            HandGlyph(center: rightWrist, angle: .degrees(22), color: Color.white.opacity(0.92), scale: 0.70)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 1.02,
+                footSpreadScale: 1.04
+            )
 
             ForEach(0..<3, id: \.self) { index in
-                let offset = CGFloat(index) * 16
+                let offset = CGFloat(index) * 11
                 SegmentView(
-                    start: CGPoint(x: leftWristBase.x - 44 - offset, y: leftWristBase.y - 20 + offset * 0.26),
-                    end: CGPoint(x: leftWristBase.x - 22 - offset, y: leftWristBase.y - 32 + offset * 0.26),
-                    color: exercise.secondaryTint.opacity(0.38),
+                    start: CGPoint(x: leftWristBase.x - 34 - offset, y: leftWristBase.y - 12 + offset * 0.24),
+                    end: CGPoint(x: leftWristBase.x - 18 - offset, y: leftWristBase.y - 22 + offset * 0.24),
+                    color: pictogramAccentColor.opacity(0.88),
                     thickness: 4
                 )
                 SegmentView(
-                    start: CGPoint(x: rightWristBase.x + 44 + offset, y: rightWristBase.y - 20 + offset * 0.26),
-                    end: CGPoint(x: rightWristBase.x + 22 + offset, y: rightWristBase.y - 32 + offset * 0.26),
-                    color: exercise.secondaryTint.opacity(0.38),
+                    start: CGPoint(x: rightWristBase.x + 34 + offset, y: rightWristBase.y - 12 + offset * 0.24),
+                    end: CGPoint(x: rightWristBase.x + 18 + offset, y: rightWristBase.y - 22 + offset * 0.24),
+                    color: pictogramAccentColor.opacity(0.88),
                     thickness: 4
                 )
             }
         }
     }
 
-    private func shoulderRolls(size: CGSize, time: TimeInterval) -> some View {
+    private func humanFingerFan(size: CGSize, time: TimeInterval) -> some View {
+        let spread = mix(0.10, 0.24, pulse(time, speed: 1.9))
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.43, 0.46, in: size)
+        let rightElbow = point(0.57, 0.46, in: size)
+        let leftPalm = point(0.44, 0.34, in: size)
+        let rightPalm = point(0.56, 0.34, in: size)
+
+        return ZStack {
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: CGPoint(x: leftPalm.x, y: leftPalm.y + 8),
+                rightWrist: CGPoint(x: rightPalm.x, y: rightPalm.y + 8),
+                torsoWidthScale: 0.94,
+                footSpreadScale: 0.90,
+                showsHands: false
+            )
+
+            fanPalm(center: leftPalm, mirrored: false, spread: spread)
+            fanPalm(center: rightPalm, mirrored: true, spread: spread)
+        }
+    }
+
+    private func humanPrayerPress(size: CGSize, time: TimeInterval) -> some View {
+        let press = pulse(time, speed: 1.4)
+        let palmOffset = mix(18, 8, press)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.45, 0.48, in: size)
+        let rightElbow = point(0.55, 0.48, in: size)
+        let center = point(0.50, 0.38, in: size)
+        let leftPalm = CGPoint(x: center.x - palmOffset, y: center.y)
+        let rightPalm = CGPoint(x: center.x + palmOffset, y: center.y)
+
+        return ZStack {
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: CGPoint(x: leftPalm.x - 6, y: leftPalm.y + 26),
+                rightWrist: CGPoint(x: rightPalm.x + 6, y: rightPalm.y + 26),
+                footSpreadScale: 0.90,
+                showsHands: false
+            )
+
+            CapsuleMarker(center: leftPalm, width: 20, height: 70, angle: .degrees(-2), color: pictogramFigureColor)
+            CapsuleMarker(center: rightPalm, width: 20, height: 70, angle: .degrees(2), color: pictogramFigureColor)
+
+            ArrowLineMarker(
+                start: CGPoint(x: center.x - 62, y: center.y),
+                end: CGPoint(x: center.x - 26, y: center.y),
+                lineWidth: 4
+            )
+            ArrowLineMarker(
+                start: CGPoint(x: center.x + 62, y: center.y),
+                end: CGPoint(x: center.x + 26, y: center.y),
+                lineWidth: 4
+            )
+        }
+    }
+
+    private func humanShoulderRolls(size: CGSize, time: TimeInterval) -> some View {
         let roll = CGFloat(time * 1.5)
-        let leftBase = point(0.43, 0.34, in: size)
-        let rightBase = point(0.57, 0.34, in: size)
-        let shoulderOffset = CGPoint(x: cos(roll) * 10, y: sin(roll) * 16)
-        let leftShoulder = CGPoint(x: leftBase.x + shoulderOffset.x, y: leftBase.y + shoulderOffset.y)
-        let rightShoulder = CGPoint(x: rightBase.x - shoulderOffset.x, y: rightBase.y + shoulderOffset.y)
-        let neck = point(0.50, 0.28, in: size)
-        let waist = point(0.50, 0.74, in: size)
+        let neck = point(0.50, 0.16, in: size)
+        let waist = point(0.50, 0.56, in: size)
+        let leftBase = point(0.44, 0.28, in: size)
+        let rightBase = point(0.56, 0.28, in: size)
+        let offset = CGPoint(x: cos(roll) * 8, y: sin(roll) * 14)
+        let leftShoulder = CGPoint(x: leftBase.x + offset.x, y: leftBase.y + offset.y)
+        let rightShoulder = CGPoint(x: rightBase.x - offset.x, y: rightBase.y + offset.y)
+        let leftElbow = point(0.35, 0.42, in: size)
+        let rightElbow = point(0.65, 0.42, in: size)
+        let leftWrist = point(0.37, 0.56, in: size)
+        let rightWrist = point(0.63, 0.56, in: size)
 
         return ZStack {
-            MotionRing(center: leftBase, diameter: 64, color: exercise.primaryTint)
-            MotionRing(center: rightBase, diameter: 64, color: exercise.primaryTint)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 1.06,
+                footSpreadScale: 1.08
+            )
 
-            SegmentView(start: neck, end: waist, color: Color.white.opacity(0.78), thickness: 28)
-            SegmentView(start: leftShoulder, end: CGPoint(x: leftShoulder.x - 34, y: leftShoulder.y + 88), color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: rightShoulder, end: CGPoint(x: rightShoulder.x + 34, y: rightShoulder.y + 88), color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-
-            JointView(center: leftShoulder, diameter: 28, color: exercise.primaryTint)
-            JointView(center: rightShoulder, diameter: 28, color: exercise.primaryTint)
-            JointView(center: neck, diameter: 44, color: Color.white.opacity(0.94))
-
-            SymbolMarker(name: "arrow.clockwise.circle.fill", center: point(0.30, 0.22, in: size), size: 30, color: exercise.primaryTint)
-            SymbolMarker(name: "arrow.clockwise.circle.fill", center: point(0.70, 0.22, in: size), size: 30, color: exercise.primaryTint)
+            CurvedArrowMarker(center: CGPoint(x: leftBase.x - 18, y: leftBase.y + 10), radius: 34, startDegrees: 220, endDegrees: 30, lineWidth: 4)
+            CurvedArrowMarker(center: CGPoint(x: rightBase.x + 18, y: rightBase.y + 10), radius: 34, startDegrees: 150, endDegrees: -40, lineWidth: 4)
         }
     }
 
-    private func wallAngels(size: CGSize, time: TimeInterval) -> some View {
+    private func humanWallAngels(size: CGSize, time: TimeInterval) -> some View {
         let sweep = pulse(time, speed: 1.15)
-        let neck = point(0.50, 0.28, in: size)
-        let waist = point(0.50, 0.74, in: size)
-        let leftShoulder = point(0.43, 0.38, in: size)
-        let rightShoulder = point(0.57, 0.38, in: size)
-        let leftElbow = point(mix(0.37, 0.28, sweep), mix(0.58, 0.40, sweep), in: size)
-        let rightElbow = point(1 - mix(0.37, 0.28, sweep), mix(0.58, 0.40, sweep), in: size)
-        let leftWrist = point(mix(0.31, 0.20, sweep), mix(0.74, 0.20, sweep), in: size)
-        let rightWrist = point(1 - mix(0.31, 0.20, sweep), mix(0.74, 0.20, sweep), in: size)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(mix(0.40, 0.30, sweep), mix(0.44, 0.27, sweep), in: size)
+        let rightElbow = point(1 - mix(0.40, 0.30, sweep), mix(0.44, 0.27, sweep), in: size)
+        let leftWrist = point(mix(0.35, 0.22, sweep), mix(0.56, 0.15, sweep), in: size)
+        let rightWrist = point(1 - mix(0.35, 0.22, sweep), mix(0.56, 0.15, sweep), in: size)
 
         return ZStack {
-            Capsule()
-                .fill(Color.white.opacity(0.08))
-                .frame(width: 14, height: size.height * 0.72)
-                .position(x: size.width * 0.50, y: size.height * 0.52)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.96,
+                footSpreadScale: 0.92
+            )
 
-            SegmentView(start: neck, end: waist, color: Color.white.opacity(0.78), thickness: 28)
-            SegmentView(start: leftShoulder, end: leftElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: rightShoulder, end: rightElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-
-            JointView(center: neck, diameter: 44, color: Color.white.opacity(0.94))
-            JointView(center: leftShoulder, diameter: 22, color: exercise.secondaryTint)
-            JointView(center: rightShoulder, diameter: 22, color: exercise.secondaryTint)
-
-            SymbolMarker(name: "arrow.up.and.down.circle.fill", center: point(0.14, 0.28, in: size), size: 30, color: exercise.primaryTint)
+            ArrowLineMarker(start: point(0.14, 0.58, in: size), end: point(0.14, 0.16, in: size), lineWidth: 4)
+            ArrowLineMarker(start: point(0.86, 0.16, in: size), end: point(0.86, 0.58, in: size), lineWidth: 4)
         }
     }
 
-    private func elbowOpeners(size: CGSize, time: TimeInterval) -> some View {
+    private func humanElbowOpeners(size: CGSize, time: TimeInterval) -> some View {
         let open = pulse(time, speed: 1.35)
-        let neck = point(0.50, 0.30, in: size)
-        let waist = point(0.50, 0.74, in: size)
-        let leftShoulder = point(0.44, 0.40, in: size)
-        let rightShoulder = point(0.56, 0.40, in: size)
-        let leftElbow = point(0.42, 0.61, in: size)
-        let rightElbow = point(0.58, 0.61, in: size)
-        let leftWrist = point(mix(0.50, 0.32, open), mix(0.48, 0.43, open), in: size)
-        let rightWrist = point(1 - mix(0.50, 0.32, open), mix(0.48, 0.43, open), in: size)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(0.44, 0.30, in: size)
+        let rightShoulder = point(0.56, 0.30, in: size)
+        let leftElbow = point(0.44, 0.44, in: size)
+        let rightElbow = point(0.56, 0.44, in: size)
+        let leftWrist = point(mix(0.49, 0.32, open), mix(0.33, 0.30, open), in: size)
+        let rightWrist = point(1 - mix(0.49, 0.32, open), mix(0.33, 0.30, open), in: size)
 
         return ZStack {
-            SegmentView(start: neck, end: waist, color: Color.white.opacity(0.78), thickness: 28)
-            SegmentView(start: leftShoulder, end: leftElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: rightShoulder, end: rightElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 0.98,
+                footSpreadScale: 0.92
+            )
 
-            JointView(center: neck, diameter: 44, color: Color.white.opacity(0.94))
-            JointView(center: leftElbow, diameter: 18, color: exercise.primaryTint)
-            JointView(center: rightElbow, diameter: 18, color: exercise.primaryTint)
-
-            SymbolMarker(name: "arrow.turn.up.left", center: point(0.25, 0.30, in: size), size: 30, color: exercise.primaryTint)
-            SymbolMarker(name: "arrow.turn.up.right", center: point(0.75, 0.30, in: size), size: 30, color: exercise.primaryTint)
+            CurvedArrowMarker(center: CGPoint(x: leftElbow.x - 18, y: leftElbow.y - 8), radius: 24, startDegrees: 245, endDegrees: 55, lineWidth: 4)
+            CurvedArrowMarker(center: CGPoint(x: rightElbow.x + 18, y: rightElbow.y - 8), radius: 24, startDegrees: 125, endDegrees: -65, lineWidth: 4)
         }
     }
 
-    private func scapularSqueeze(size: CGSize, time: TimeInterval) -> some View {
+    private func humanScapularSqueeze(size: CGSize, time: TimeInterval) -> some View {
         let squeeze = pulse(time, speed: 1.3)
-        let neck = point(0.50, 0.28, in: size)
-        let waist = point(0.50, 0.72, in: size)
-        let chestCenter = point(0.50, 0.50, in: size)
-        let leftShoulder = point(mix(0.43, 0.40, squeeze), mix(0.38, 0.36, squeeze), in: size)
-        let rightShoulder = point(1 - mix(0.43, 0.40, squeeze), mix(0.38, 0.36, squeeze), in: size)
-        let leftElbow = point(mix(0.39, 0.30, squeeze), mix(0.58, 0.52, squeeze), in: size)
-        let rightElbow = point(1 - mix(0.39, 0.30, squeeze), mix(0.58, 0.52, squeeze), in: size)
-        let leftWrist = point(mix(0.45, 0.35, squeeze), mix(0.49, 0.44, squeeze), in: size)
-        let rightWrist = point(1 - mix(0.45, 0.35, squeeze), mix(0.49, 0.44, squeeze), in: size)
+        let neck = point(0.50, 0.17, in: size)
+        let waist = point(0.50, 0.57, in: size)
+        let leftShoulder = point(mix(0.44, 0.41, squeeze), mix(0.30, 0.28, squeeze), in: size)
+        let rightShoulder = point(1 - mix(0.44, 0.41, squeeze), mix(0.30, 0.28, squeeze), in: size)
+        let leftElbow = point(mix(0.42, 0.34, squeeze), mix(0.43, 0.38, squeeze), in: size)
+        let rightElbow = point(1 - mix(0.42, 0.34, squeeze), mix(0.43, 0.38, squeeze), in: size)
+        let leftWrist = point(mix(0.46, 0.37, squeeze), mix(0.35, 0.30, squeeze), in: size)
+        let rightWrist = point(1 - mix(0.46, 0.37, squeeze), mix(0.35, 0.30, squeeze), in: size)
 
         return ZStack {
-            Capsule()
-                .fill(Color.white.opacity(0.14))
-                .frame(width: mix(94, 122, squeeze), height: 136)
-                .position(chestCenter)
+            StandingPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist,
+                torsoWidthScale: 1.03,
+                footSpreadScale: 1.02
+            )
 
-            SegmentView(start: neck, end: waist, color: Color.white.opacity(0.78), thickness: 28)
-            SegmentView(start: leftShoulder, end: leftElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: rightShoulder, end: rightElbow, color: exercise.secondaryTint.opacity(0.84), thickness: 20)
-            SegmentView(start: leftElbow, end: leftWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-            SegmentView(start: rightElbow, end: rightWrist, color: exercise.primaryTint.opacity(0.92), thickness: 18)
-
-            JointView(center: neck, diameter: 44, color: Color.white.opacity(0.94))
-            SymbolMarker(name: "arrow.left.and.right", center: point(0.50, 0.24, in: size), size: 34, color: exercise.primaryTint)
+            ArrowLineMarker(start: point(0.38, 0.24, in: size), end: point(0.46, 0.24, in: size), lineWidth: 4)
+            ArrowLineMarker(start: point(0.62, 0.24, in: size), end: point(0.54, 0.24, in: size), lineWidth: 4)
         }
     }
 
-    private func seatedTwist(size: CGSize, time: TimeInterval) -> some View {
-        let twist = Angle(radians: sin(time * 1.1) * 0.28)
+    private func humanSeatedTwist(size: CGSize, time: TimeInterval) -> some View {
+        let twist = CGFloat(sin(time * 1.1) * 0.28)
+        let waist = point(0.50, 0.50, in: size)
+        let neck = rotate(point(0.50, 0.17, in: size), around: waist, by: twist)
+        let leftShoulder = rotate(point(0.44, 0.29, in: size), around: waist, by: twist)
+        let rightShoulder = rotate(point(0.56, 0.29, in: size), around: waist, by: twist)
+        let leftElbow = rotate(point(0.42, 0.41, in: size), around: waist, by: twist)
+        let rightElbow = rotate(point(0.60, 0.45, in: size), around: waist, by: twist)
+        let leftWrist = rotate(point(0.56, 0.42, in: size), around: waist, by: twist)
+        let rightWrist = rotate(point(0.44, 0.50, in: size), around: waist, by: twist)
 
         return ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.10))
-                .frame(width: 150, height: 20)
-                .position(x: size.width * 0.50, y: size.height * 0.84)
+                .fill(pictogramFigureColor.opacity(0.14))
+                .frame(width: 138, height: 18)
+                .position(x: size.width * 0.50, y: size.height * 0.76)
 
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.10))
-                .frame(width: 22, height: 96)
-                .position(x: size.width * 0.50, y: size.height * 0.71)
+                .fill(pictogramFigureColor.opacity(0.14))
+                .frame(width: 18, height: 78)
+                .position(x: size.width * 0.50, y: size.height * 0.65)
 
-            TwistFigure(primaryTint: exercise.primaryTint, secondaryTint: exercise.secondaryTint)
-                .frame(width: min(size.width * 0.34, 230), height: min(size.height * 0.72, 250))
-                .rotationEffect(twist, anchor: .bottom)
-                .position(x: size.width * 0.50, y: size.height * 0.67)
+            SeatedPictogramFigure(
+                neck: neck,
+                waist: waist,
+                leftShoulder: leftShoulder,
+                rightShoulder: rightShoulder,
+                leftElbow: leftElbow,
+                rightElbow: rightElbow,
+                leftWrist: leftWrist,
+                rightWrist: rightWrist
+            )
 
-            SymbolMarker(name: "arrow.uturn.left.circle.fill", center: point(0.24, 0.26, in: size), size: 32, color: exercise.primaryTint)
-            SymbolMarker(name: "arrow.uturn.right.circle.fill", center: point(0.76, 0.26, in: size), size: 32, color: exercise.primaryTint)
+            CurvedArrowMarker(center: point(0.30, 0.23, in: size), radius: 26, startDegrees: 260, endDegrees: 60, lineWidth: 4)
+            CurvedArrowMarker(center: point(0.70, 0.23, in: size), radius: 26, startDegrees: 120, endDegrees: -80, lineWidth: 4)
         }
     }
 
+    private func fanPalm(center: CGPoint, mirrored: Bool, spread: CGFloat) -> some View {
+        let direction: CGFloat = mirrored ? -1 : 1
+
+        return ZStack {
+            PalmGlyph(
+                center: center,
+                angle: .degrees(mirrored ? 10 : -10),
+                color: pictogramFigureColor,
+                scale: 0.62
+            )
+
+            ForEach(-2...2, id: \.self) { index in
+                let factor = CGFloat(index)
+                let start = CGPoint(
+                    x: center.x + (mirrored ? -factor : factor) * 5,
+                    y: center.y - 34
+                )
+                let end = translated(
+                    start,
+                    by: vector(
+                        length: 34 - CGFloat(abs(index)) * 3,
+                        angle: -.pi / 2 + direction * factor * spread + (mirrored ? 0.05 : -0.05)
+                    )
+                )
+
+                SegmentView(start: start, end: end, color: pictogramAccentColor.opacity(0.92), thickness: 6)
+            }
+
+            SegmentView(
+                start: CGPoint(x: center.x + (mirrored ? 16 : -16), y: center.y - 4),
+                end: CGPoint(x: center.x + (mirrored ? 34 : -34), y: center.y - 16),
+                color: pictogramAccentColor.opacity(0.92),
+                thickness: 6
+            )
+        }
+    }
 }
 
-private struct ExerciseBackdrop: View {
-    let primaryTint: Color
+private struct StandingPictogramFigure: View {
+    let neck: CGPoint
+    let waist: CGPoint
+    let leftShoulder: CGPoint
+    let rightShoulder: CGPoint
+    let leftElbow: CGPoint
+    let rightElbow: CGPoint
+    let leftWrist: CGPoint
+    let rightWrist: CGPoint
+    var torsoWidthScale: CGFloat = 1
+    var footSpreadScale: CGFloat = 1
+    var showsHands: Bool = true
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .stroke(primaryTint.opacity(0.08), style: StrokeStyle(lineWidth: 1, dash: [8, 12]))
-            .padding(12)
+        let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
+        let outline = shoulderDistance * 0.065
+        let chest = midpoint(leftShoulder, rightShoulder)
+        let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
+        let hipOffset = shoulderDistance * 0.24
+        let leftHip = CGPoint(x: waist.x - hipOffset, y: waist.y)
+        let rightHip = CGPoint(x: waist.x + hipOffset, y: waist.y)
+        let upperLegLength = shoulderDistance * 0.70
+        let lowerLegLength = shoulderDistance * 0.68
+        let kneeLift = shoulderDistance * 0.06
+        let leftKnee = CGPoint(x: waist.x - hipOffset * 0.78, y: waist.y + upperLegLength - kneeLift)
+        let rightKnee = CGPoint(x: waist.x + hipOffset * 0.78, y: waist.y + upperLegLength - kneeLift)
+        let footSpread = hipOffset * 1.18 * footSpreadScale
+        let leftFoot = CGPoint(x: waist.x - footSpread, y: leftKnee.y + lowerLegLength)
+        let rightFoot = CGPoint(x: waist.x + footSpread, y: rightKnee.y + lowerLegLength)
+        let jointDiameter = shoulderDistance * 0.17
+        let outlineJointDiameter = jointDiameter + outline * 2.4
+        let wristDiameter = shoulderDistance * 0.12
+        let outlineWristDiameter = wristDiameter + outline * 1.8
+
+        return ZStack {
+            Ellipse()
+                .fill(pictogramOutlineColor)
+                .frame(width: shoulderDistance * 0.48 + outline * 2, height: shoulderDistance * 0.66 + outline * 2)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramOutlineColor, thickness: shoulderDistance * 0.15 + outline * 2)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92 * torsoWidthScale + outline * 2,
+                waistWidth: shoulderDistance * 0.56 + outline * 1.6
+            )
+            .fill(pictogramOutlineColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            JointView(center: leftShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+
+            if showsHands {
+                JointView(center: leftWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+                JointView(center: rightWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+            }
+
+            FootMarker(
+                center: leftFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+            FootMarker(
+                center: rightFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+
+            Ellipse()
+                .fill(pictogramFigureColor)
+                .frame(width: shoulderDistance * 0.48, height: shoulderDistance * 0.66)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramFigureColor, thickness: shoulderDistance * 0.15)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92 * torsoWidthScale,
+                waistWidth: shoulderDistance * 0.56
+            )
+            .fill(pictogramFigureColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramFigureColor, thickness: shoulderDistance * 0.17)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramFigureColor, thickness: shoulderDistance * 0.17)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramFigureColor, thickness: shoulderDistance * 0.16)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramFigureColor, thickness: shoulderDistance * 0.16)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+
+            JointView(center: leftShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightKnee, diameter: jointDiameter, color: pictogramFigureColor)
+
+            if showsHands {
+                JointView(center: leftWrist, diameter: wristDiameter, color: pictogramFigureColor)
+                JointView(center: rightWrist, diameter: wristDiameter, color: pictogramFigureColor)
+            }
+
+            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+        }
+    }
+}
+
+private struct SeatedPictogramFigure: View {
+    let neck: CGPoint
+    let waist: CGPoint
+    let leftShoulder: CGPoint
+    let rightShoulder: CGPoint
+    let leftElbow: CGPoint
+    let rightElbow: CGPoint
+    let leftWrist: CGPoint
+    let rightWrist: CGPoint
+
+    var body: some View {
+        let shoulderDistance = max(distance(leftShoulder, rightShoulder), 48)
+        let outline = shoulderDistance * 0.065
+        let chest = midpoint(leftShoulder, rightShoulder)
+        let neckBase = CGPoint(x: neck.x, y: neck.y + shoulderDistance * 0.16)
+        let hipOffset = shoulderDistance * 0.24
+        let leftHip = CGPoint(x: waist.x - hipOffset, y: waist.y)
+        let rightHip = CGPoint(x: waist.x + hipOffset, y: waist.y)
+        let leftKnee = CGPoint(x: waist.x - shoulderDistance * 0.08, y: waist.y + shoulderDistance * 0.28)
+        let rightKnee = CGPoint(x: waist.x + shoulderDistance * 0.16, y: waist.y + shoulderDistance * 0.28)
+        let leftFoot = CGPoint(x: leftKnee.x - shoulderDistance * 0.08, y: leftKnee.y + shoulderDistance * 0.28)
+        let rightFoot = CGPoint(x: rightKnee.x + shoulderDistance * 0.04, y: rightKnee.y + shoulderDistance * 0.28)
+        let jointDiameter = shoulderDistance * 0.17
+        let outlineJointDiameter = jointDiameter + outline * 2.4
+        let wristDiameter = shoulderDistance * 0.11
+        let outlineWristDiameter = wristDiameter + outline * 1.8
+
+        return ZStack {
+            Ellipse()
+                .fill(pictogramOutlineColor)
+                .frame(width: shoulderDistance * 0.48 + outline * 2, height: shoulderDistance * 0.66 + outline * 2)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramOutlineColor, thickness: shoulderDistance * 0.15 + outline * 2)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92 + outline * 2,
+                waistWidth: shoulderDistance * 0.58 + outline * 1.6
+            )
+            .fill(pictogramOutlineColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramOutlineColor, thickness: shoulderDistance * 0.17 + outline * 2)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramOutlineColor, thickness: shoulderDistance * 0.16 + outline * 2)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramOutlineColor, thickness: shoulderDistance * 0.14 + outline * 2)
+
+            JointView(center: leftShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightShoulder, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightElbow, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightHip, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: rightKnee, diameter: outlineJointDiameter, color: pictogramOutlineColor)
+            JointView(center: leftWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+            JointView(center: rightWrist, diameter: outlineWristDiameter, color: pictogramOutlineColor)
+
+            FootMarker(
+                center: leftFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+            FootMarker(
+                center: rightFoot,
+                width: shoulderDistance * 0.22 + outline * 2,
+                height: shoulderDistance * 0.10 + outline * 1.2,
+                color: pictogramOutlineColor
+            )
+
+            Ellipse()
+                .fill(pictogramFigureColor)
+                .frame(width: shoulderDistance * 0.48, height: shoulderDistance * 0.66)
+                .position(neck)
+
+            SegmentView(start: neckBase, end: chest, color: pictogramFigureColor, thickness: shoulderDistance * 0.15)
+
+            PictogramTorsoShape(
+                chest: chest,
+                pelvis: waist,
+                chestWidth: shoulderDistance * 0.92,
+                waistWidth: shoulderDistance * 0.58
+            )
+            .fill(pictogramFigureColor)
+
+            SegmentView(start: leftShoulder, end: leftElbow, color: pictogramFigureColor, thickness: shoulderDistance * 0.17)
+            SegmentView(start: rightShoulder, end: rightElbow, color: pictogramFigureColor, thickness: shoulderDistance * 0.17)
+            SegmentView(start: leftElbow, end: leftWrist, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+            SegmentView(start: rightElbow, end: rightWrist, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+
+            SegmentView(start: leftHip, end: leftKnee, color: pictogramFigureColor, thickness: shoulderDistance * 0.16)
+            SegmentView(start: rightHip, end: rightKnee, color: pictogramFigureColor, thickness: shoulderDistance * 0.16)
+            SegmentView(start: leftKnee, end: leftFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+            SegmentView(start: rightKnee, end: rightFoot, color: pictogramFigureColor, thickness: shoulderDistance * 0.14)
+
+            JointView(center: leftShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightShoulder, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightElbow, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightHip, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: rightKnee, diameter: jointDiameter, color: pictogramFigureColor)
+            JointView(center: leftWrist, diameter: wristDiameter, color: pictogramFigureColor)
+            JointView(center: rightWrist, diameter: wristDiameter, color: pictogramFigureColor)
+
+            FootMarker(center: leftFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+            FootMarker(center: rightFoot, width: shoulderDistance * 0.22, height: shoulderDistance * 0.10, color: pictogramFigureColor)
+        }
+    }
+}
+
+private struct CurvedArrowMarker: View {
+    let center: CGPoint
+    let radius: CGFloat
+    let startDegrees: CGFloat
+    let endDegrees: CGFloat
+    var lineWidth: CGFloat = 4
+
+    var body: some View {
+        let tip = point(onCircleAt: endDegrees)
+        let leftWing = wingPoint(from: tip, angleDegrees: endDegrees - 28)
+        let rightWing = wingPoint(from: tip, angleDegrees: endDegrees + 28)
+
+        return ZStack {
+            Path { path in
+                path.addArc(
+                    center: center,
+                    radius: radius,
+                    startAngle: .degrees(Double(startDegrees)),
+                    endAngle: .degrees(Double(endDegrees)),
+                    clockwise: false
+                )
+            }
+            .stroke(pictogramAccentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+
+            Path { path in
+                path.move(to: tip)
+                path.addLine(to: leftWing)
+                path.move(to: tip)
+                path.addLine(to: rightWing)
+            }
+            .stroke(pictogramAccentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+        }
+    }
+
+    private func point(onCircleAt degrees: CGFloat) -> CGPoint {
+        let radians = degrees * .pi / 180
+        return CGPoint(
+            x: center.x + cos(radians) * radius,
+            y: center.y + sin(radians) * radius
+        )
+    }
+
+    private func wingPoint(from tip: CGPoint, angleDegrees: CGFloat) -> CGPoint {
+        let radians = angleDegrees * .pi / 180
+        return CGPoint(
+            x: tip.x - cos(radians) * lineWidth * 3.2,
+            y: tip.y - sin(radians) * lineWidth * 3.2
+        )
+    }
+}
+
+private struct ArrowLineMarker: View {
+    let start: CGPoint
+    let end: CGPoint
+    var lineWidth: CGFloat = 4
+
+    var body: some View {
+        let theta = angle(start, end)
+        let leftWing = CGPoint(
+            x: end.x - cos(theta - .pi / 6) * lineWidth * 3.2,
+            y: end.y - sin(theta - .pi / 6) * lineWidth * 3.2
+        )
+        let rightWing = CGPoint(
+            x: end.x - cos(theta + .pi / 6) * lineWidth * 3.2,
+            y: end.y - sin(theta + .pi / 6) * lineWidth * 3.2
+        )
+
+        return ZStack {
+            Path { path in
+                path.move(to: start)
+                path.addLine(to: end)
+            }
+            .stroke(pictogramAccentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+
+            Path { path in
+                path.move(to: end)
+                path.addLine(to: leftWing)
+                path.move(to: end)
+                path.addLine(to: rightWing)
+            }
+            .stroke(pictogramAccentColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round))
+        }
+    }
+}
+
+private struct FootMarker: View {
+    let center: CGPoint
+    let width: CGFloat
+    let height: CGFloat
+    var color: Color = pictogramFigureColor
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: height * 0.5, style: .continuous)
+            .fill(color)
+            .frame(width: width, height: height)
+            .position(center)
+    }
+}
+
+private struct PictogramTorsoShape: Shape {
+    let chest: CGPoint
+    let pelvis: CGPoint
+    let chestWidth: CGFloat
+    let waistWidth: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let dx = pelvis.x - chest.x
+        let dy = pelvis.y - chest.y
+        let length = max(sqrt(dx * dx + dy * dy), 0.001)
+        let unit = CGPoint(x: dx / length, y: dy / length)
+        let normal = CGPoint(x: -unit.y, y: unit.x)
+
+        let topLeft = CGPoint(x: chest.x + normal.x * chestWidth * 0.5, y: chest.y + normal.y * chestWidth * 0.5)
+        let topRight = CGPoint(x: chest.x - normal.x * chestWidth * 0.5, y: chest.y - normal.y * chestWidth * 0.5)
+        let bottomRight = CGPoint(x: pelvis.x - normal.x * waistWidth * 0.5, y: pelvis.y - normal.y * waistWidth * 0.5)
+        let bottomLeft = CGPoint(x: pelvis.x + normal.x * waistWidth * 0.5, y: pelvis.y + normal.y * waistWidth * 0.5)
+
+        var path = Path()
+        path.move(to: topLeft)
+        path.addQuadCurve(
+            to: topRight,
+            control: CGPoint(x: chest.x, y: chest.y + length * 0.08)
+        )
+        path.addLine(to: bottomRight)
+        path.addQuadCurve(
+            to: bottomLeft,
+            control: CGPoint(x: pelvis.x, y: pelvis.y - length * 0.14)
+        )
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -830,33 +1276,6 @@ private struct CapsuleMarker: View {
     }
 }
 
-private struct MotionRing: View {
-    let center: CGPoint
-    let diameter: CGFloat
-    let color: Color
-
-    var body: some View {
-        Circle()
-            .stroke(color.opacity(0.32), style: StrokeStyle(lineWidth: 3, dash: [8, 12]))
-            .frame(width: diameter, height: diameter)
-            .position(center)
-    }
-}
-
-private struct SymbolMarker: View {
-    let name: String
-    let center: CGPoint
-    let size: CGFloat
-    let color: Color
-
-    var body: some View {
-        Image(systemName: name)
-            .font(.system(size: size, weight: .semibold))
-            .foregroundStyle(color.opacity(0.92))
-            .position(center)
-    }
-}
-
 private struct PalmGlyph: View {
     let center: CGPoint
     let angle: Angle
@@ -891,36 +1310,6 @@ private struct HandGlyph: View {
                 .frame(width: 12 * scale, height: 28 * scale)
                 .rotationEffect(angle + .degrees(38))
                 .position(x: center.x + (18 * scale), y: center.y + (12 * scale))
-        }
-    }
-}
-
-private struct TwistFigure: View {
-    let primaryTint: Color
-    let secondaryTint: Color
-
-    var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let neck = point(0.50, 0.16, in: size)
-            let waist = point(0.50, 0.78, in: size)
-            let leftShoulder = point(0.34, 0.28, in: size)
-            let rightShoulder = point(0.66, 0.28, in: size)
-            let leftElbow = point(0.28, 0.44, in: size)
-            let rightElbow = point(0.72, 0.54, in: size)
-            let leftWrist = point(0.62, 0.52, in: size)
-            let rightWrist = point(0.36, 0.62, in: size)
-
-            ZStack {
-                SegmentView(start: neck, end: waist, color: Color.white.opacity(0.80), thickness: 26)
-                SegmentView(start: leftShoulder, end: rightShoulder, color: secondaryTint.opacity(0.84), thickness: 18)
-                SegmentView(start: leftShoulder, end: leftElbow, color: primaryTint.opacity(0.92), thickness: 16)
-                SegmentView(start: rightShoulder, end: rightElbow, color: primaryTint.opacity(0.92), thickness: 16)
-                SegmentView(start: leftElbow, end: leftWrist, color: Color.white.opacity(0.78), thickness: 14)
-                SegmentView(start: rightElbow, end: rightWrist, color: Color.white.opacity(0.78), thickness: 14)
-
-                JointView(center: neck, diameter: 40, color: Color.white.opacity(0.94))
-            }
         }
     }
 }
@@ -960,4 +1349,14 @@ private func midpoint(_ start: CGPoint, _ end: CGPoint) -> CGPoint {
 
 private func angle(_ start: CGPoint, _ end: CGPoint) -> CGFloat {
     atan2(end.y - start.y, end.x - start.x)
+}
+
+private func rotate(_ point: CGPoint, around origin: CGPoint, by angle: CGFloat) -> CGPoint {
+    let translatedX = point.x - origin.x
+    let translatedY = point.y - origin.y
+
+    return CGPoint(
+        x: origin.x + (translatedX * cos(angle) - translatedY * sin(angle)),
+        y: origin.y + (translatedX * sin(angle) + translatedY * cos(angle))
+    )
 }
