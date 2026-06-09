@@ -10,7 +10,6 @@ final class SettingsStore: ObservableObject {
         static let callRetryDelaySeconds = "callRetryDelaySeconds"
         static let useHardwareActivityDetection = "useHardwareActivityDetection"
         static let useWindowTitleFallback = "useWindowTitleFallback"
-        static let exerciseAnimationStyle = "exerciseAnimationStyle"
     }
 
     private let defaults: UserDefaults
@@ -58,12 +57,6 @@ final class SettingsStore: ObservableObject {
         }
     }
 
-    @Published var exerciseAnimationStyle: ExerciseAnimationStyle {
-        didSet {
-            persist(exerciseAnimationStyle.rawValue, forKey: Keys.exerciseAnimationStyle)
-        }
-    }
-
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
 
@@ -74,7 +67,6 @@ final class SettingsStore: ObservableObject {
         let storedCallRetryDelay = defaults.object(forKey: Keys.callRetryDelaySeconds) as? Double ?? 60
         let storedUseHardwareActivityDetection = defaults.object(forKey: Keys.useHardwareActivityDetection) as? Bool ?? true
         let storedUseWindowTitleFallback = defaults.object(forKey: Keys.useWindowTitleFallback) as? Bool ?? true
-        let storedExerciseAnimationStyle = defaults.string(forKey: Keys.exerciseAnimationStyle)
 
         workIntervalMinutes = storedWorkInterval.clamped(to: 5...120)
         breakDurationSeconds = storedBreakDuration.clamped(to: 10...300)
@@ -83,7 +75,6 @@ final class SettingsStore: ObservableObject {
         callRetryDelaySeconds = storedCallRetryDelay.clamped(to: 15...600)
         useHardwareActivityDetection = storedUseHardwareActivityDetection
         useWindowTitleFallback = storedUseWindowTitleFallback
-        exerciseAnimationStyle = ExerciseAnimationStyle(rawValue: storedExerciseAnimationStyle ?? "") ?? .classic
 
         isBootstrapping = false
 
@@ -94,7 +85,6 @@ final class SettingsStore: ObservableObject {
         defaults.set(callRetryDelaySeconds, forKey: Keys.callRetryDelaySeconds)
         defaults.set(useHardwareActivityDetection, forKey: Keys.useHardwareActivityDetection)
         defaults.set(useWindowTitleFallback, forKey: Keys.useWindowTitleFallback)
-        defaults.set(exerciseAnimationStyle.rawValue, forKey: Keys.exerciseAnimationStyle)
     }
 
     var workInterval: TimeInterval {
