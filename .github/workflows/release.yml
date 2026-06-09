@@ -1,0 +1,69 @@
+name: Build Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build macOS release
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build Release app
+        run: |
+          set -euo pipefail
+
+          xcodebuild \
+            -project Timeout.xcodeproj \
+            -scheme Timeout \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package app bundle
+        run: |
+          set -euo pipefail
+
+          app_path='build/DerivedData/Build/Products/Release/Timeout!.app'
+          release_dir='build/release'
+          zip_path="${release_dir}/Timeout!.zip"
+
+          test -d "${app_path}"
+          mkdir -p "${release_dir}"
+          ditto -c -k --sequesterRsrc --keepParent "${app_path}" "${zip_path}"
+          shasum -a 256 "${zip_path}" > "${zip_path}.sha256"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          short_sha="${GITHUB_SHA::7}"
+          tag_name="main-${GITHUB_RUN_NUMBER}-${short_sha}"
+
+          gh release create "${tag_name}" \
+            --target "${GITHUB_SHA}" \
+            --title "Timeout! ${short_sha}" \
+            --notes "Automated Release build for commit ${GITHUB_SHA} on main. This app is unsigned and not notarized, so macOS will ask for approval on first launch." \
+            --latest \
+            'build/release/Timeout!.zip#Timeout!.zip' \
+            'build/release/Timeout!.zip.sha256#Timeout!.zip.sha256'
